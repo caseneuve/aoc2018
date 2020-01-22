@@ -17,7 +17,7 @@ As input we get integers representing change of "frequency". To count final freq
 
 ## Solutions {#solutions}
 
-[Full solution in a file](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle01.clj)
+[Check full solution in the repo](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle01.clj)
 
 
 ### Namespace {#namespace}
