@@ -1,12 +1,9 @@
 # Advent of Code 2018
 My personal solutions in Clojure.
 
-All puzzles, solutions and additional notes are stored in an Org-mode file [aoc-2018.org].
+Please visit my [AoC 2018 blog] for better reading experience.
 
-## TOC
+All puzzles, solutions and additional notes are stored in an Org-mode file [aoc2018.org].
 
-| day | puzzles             | solutions | used hints |
-|:---:|---------------------|-----------|:----------:|
-| 1   | Chronal Calibration |           |            |
-
-[aoc-2018.org]: https://gitlab.com/pkaznowski/advent_of_code_2018/blob/master/aoc-2018.org
+[aoc-2018.org]: https://gitlab.com/pkaznowski/aoc18/blob/master/aoc2018.org 
+[Aoc 2018 blog]: https://pkaznowski.gitlab.io/aoc18/
