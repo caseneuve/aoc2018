@@ -1,0 +1,1600 @@
+:setup:
+#+HUGO_BASE_DIR: .
+#+HUGO_SECTION: post
+#+todo: todo | edit finished
+#+PROPERTY: header-args :exports code :results output
+:end:
+#+title:  Advent of Code 2018
+#+author: Piotr Kaznowski
+#+date:   2020-01-03
+
+* edit About
+CLOSED: [2020-01-10 Fri 10:49]
+:PROPERTIES:
+:EXPORT_HUGO_SECTION: /
+:EXPORT_FILE_NAME: about
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :hidden true
+:END:
+** Idea
+https://adventofcode.com/
+
+** Resources
+- [[https://github.com/pgorczak/adventofcode-clj/][Philipp Gorczak's AoC 2018 solutions]] 
+- [[https://github.com/borkdude/advent-of-cljc/tree/master/src/aoc/y2018][Borkdude's AoC 2018 solutions]] 
+
+* edit Disclaimer
+CLOSED: [2020-01-11 Sat 10:49]
+:PROPERTIES:
+:EXPORT_HUGO_SECTION: /
+:EXPORT_FILE_NAME: disclaimer
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :hidden true
+:END:
+Disclaimer
+
+* todo Setup                  :arrow_threads:require:ns:
+:PROPERTIES:
+:EXPORT_FILE_NAME: setup
+:EXPORT_HUGO_WEIGHT: 100
+:END:
+- [ ] how to setup org babel?
+- [ ] utils
+** todo Emacs
+Babel, tangle, ox-hugo and cider
+
+** todo AoC utils
+*** Bash
+get input
+*** Clojure
+
+Here: tests for utils
+
+* edit Day 01: Chronal Calibration :apply:loop:cycle:reductions:
+CLOSED: [2020-01-10 Fri 10:55]
+:PROPERTIES:
+:EXPORT_FILE_NAME: day01
+:EXPORT_HUGO_WEIGHT: 101
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Apply, loop and reductions"
+:END:
+** Puzzle summary
+
+https://adventofcode.com/2018/day/1
+
+As input we get integers representing change of "frequency". To count final frequency we need to add all changes starting from 0. For example changes notes as ~+1, -2, +3, +1~ would give final frequency ~3~.
+ 
+** Descriptions               :noexport:
+*** Part 1
+"We've detected some temporal anomalies," one of Santa's Elves at the Temporal Anomaly Research and Detection Instrument Station tells you. She sounded pretty worried when she called you down here. "At 500-year intervals into the past, someone has been changing Santa's history!"
+
+"The good news is that the changes won't propagate to our time stream for another 25 days, and we have a device" - she attaches something to your wrist - "that will let you fix the changes with no such propagation delay. It's configured to send you 500 years further into the past every few days; that was the best we could do on such short notice."
+
+"The bad news is that we are detecting roughly fifty anomalies throughout time; the device will indicate fixed anomalies with stars. The other bad news is that we only have one device and you're the best person for the job! Good lu--" She taps a button on the device and you suddenly feel like you're falling. To save Christmas, you need to get all fifty stars by December 25th.
+
+Collect stars by solving puzzles. Two puzzles will be made available on each day in the Advent calendar; the second puzzle is unlocked when you complete the first. Each puzzle grants one star. Good luck!
+
+After feeling like you've been falling for a few minutes, you look at the device's tiny screen. "Error: Device must be calibrated before first use. Frequency drift detected. Cannot maintain destination lock." Below the message, the device shows a sequence of changes in frequency (your puzzle input). A value like +6 means the current frequency increases by 6; a value like -3 means the current frequency decreases by 3.
+
+For example, if the device displays frequency changes of +1, -2, +3, +1, then starting from a frequency of zero, the following changes would occur:
+
+Current frequency  0, change of +1; resulting frequency  1.
+Current frequency  1, change of -2; resulting frequency -1.
+Current frequency -1, change of +3; resulting frequency  2.
+Current frequency  2, change of +1; resulting frequency  3.
+
+In this example, the resulting frequency is 3.
+
+Here are other example situations:
+
++1, +1, +1 results in  3
++1, +1, -2 results in  0
+-1, -2, -3 results in -6
+
+Starting with a frequency of zero, what is the resulting frequency after all of the changes in frequency have been applied?
+*** Part 2
+You notice that the device repeats the same frequency change list over and over. To calibrate the device, you need to find the first frequency it reaches twice.
+
+For example, using the same list of changes above, the device would loop as follows:
+
+#+begin_example
+Current frequency  0, change of +1; resulting frequency  1.
+Current frequency  1, change of -2; resulting frequency -1.
+Current frequency -1, change of +3; resulting frequency  2.
+Current frequency  2, change of +1; resulting frequency  3.
+(At this point, the device continues from the start of the list.)
+Current frequency  3, change of +1; resulting frequency  4.
+Current frequency  4, change of -2; resulting frequency  2, which has already been seen.
+#+end_example
+
+In this example, the first frequency reached twice is 2. Note that your device might need to repeat its list of frequency changes many times before a duplicate frequency is found, and that duplicates might be found while in the middle of processing the list.
+
+Here are other examples:
+
+#+begin_example
++1, -1 first reaches 0 twice.
++3, +3, +4, -2, -4 first reaches 10 twice.
+-6, +3, +8, +5, -6 first reaches 5 twice.
++7, +7, -2, -7, -4 first reaches 14 twice.
+#+end_example
+
+What is the first frequency your device reaches twice?
+
+** Solutions
+*** Namespace
+Since I would always use some helpers to read input, I will further on export ~namespace~ definition only when other requirements are needed.
+
+#+name: day01_ns
+#+begin_src clojure :noweb-ref code01
+  (ns aoc18.puzzle01 (:require [aoc18.utils :refer [input->ints]]
+                               [clojure.repl :refer [doc]]))
+
+#+end_src
+
+#+name: day01_test_ns
+#+begin_src clojure :noweb-ref test01
+(ns aoc18.puzzle01-test
+  (:require [clojure.test :refer :all]
+            [aoc18.puzzle01 :refer [find-repeated-freq]]))
+
+#+end_src
+
+*** Find repeated requency (part 2)
+Since part 1 consists on merely applying... ~apply~ to the collection of integers let's skip to part 2 immediately.
+
+The task is to find first frequency which is reached twice. We would cycle through the input putting each frequency to a ~hash-map~. If given frequency is already there, that'd be solution, if not, we have to loop more.
+
+First I had to understand the ~loop~ form in Clojure. Recursion, as it seems, is not necessarily implemented through invoking the function in it's declaration but by using ~recur~ special form inside a loop. Loop takes arguments which and exactly the same structure of args has to be passed to recur.
+
+In our loop we need input which will be cycled and concecutive frequencies counted by adding next change to the current frequency starting with 0. To implement simple loop operating on consecutive elements of a seq we may use destructing notation which takes first element and the rest from a seq, like this. Then, if certain condition is not satisfied we would recur passing the rest or return value:
+
+#+name: day01_loop_example
+#+begin_src clojure :exports code :results silent
+  (loop [[first_el & the_rest] [0 1 2 3 4]
+         increased_by_1 []]
+    (if first_el
+      (recur the_rest (conj increased_by_1 (inc first_el)))
+      increased_by_1))   ;; => [1 2 3 4 5]
+
+#+end_src 
+
+Let's apply this to our case:
+
+#+name: day01_find_repeated_freq
+#+begin_src clojure :noweb-ref code01
+  (defn find-repeated-freq [input]
+    (loop [[freq & rest] (reductions + (cycle input))
+           seen #{0}]
+      (if (contains? seen freq)   ; we might write (seen freq) as well
+        freq
+        (recur rest (conj seen freq)))))
+
+#+end_src
+
+This func should behave like this:
+
+#+name: day01_find_repeated_freq_test
+#+begin_src clojure :noweb-ref test01 :exports code
+(deftest find-repeated-freq-test
+  (testing "should match exemplary data"
+    (is (= 0  (find-repeated-freq [1 -1])))
+    (is (= 10 (find-repeated-freq [3 3 4 -2 -4])))
+    (is (= 5  (find-repeated-freq [-6 3 8 5 -6])))
+    (is (= 14 (find-repeated-freq [7 7 -2 -7 -4])))))
+
+#+end_src
+
+~reductions~ is where magic happens. Let's look at the [[https://clojuredocs.org/clojure.core/reductions][docs]]:
+
+#+name: day01_doc_reductions
+#+begin_src clojure :exports results
+(doc reductions)
+#+end_src
+
+#+RESULTS: day01_doc_reductions
+: -------------------------
+: clojure.core/reductions
+: ([f coll] [f init coll])
+:   Returns a lazy seq of the intermediate values of the reduction (as
+:   per reduce) of coll by f, starting with init.
+
+So ~reductions~ give us "snapshots" of consecutive moves of ~reduce~. For example reduceing integers from 0 to 4 with sum (~+~) would give ~10~. Using reductions would return seq of every step, namely:
+1. ~0~,
+2. ~0 + 1 = 1~,
+3. ~1 + 2 = 3~,
+4. ~3 + 3 = 6~,
+5. ~6 + 4 = 10~.
+
+#+name: day01_reductions_example
+#+begin_src clojure :exports code :results output
+  (vec (reductions + (range 5))) ;; => [0 1 3 6 10]
+  (reduce + (range 5))           ;; => 10
+#+end_src
+
+#+RESULTS: day01_reductions_example
+: [0 1 3 6 10]
+: 10
+
+*** Putting things together
+Our solution will be as follows:
+
+#+name: day01_solve
+#+begin_src clojure :noweb-ref code01
+  (defn solve []
+    (let [input (input->ints "day01")]
+      {:part1 (time (apply + input))
+       :part2 (time (find-repeated-freq input))}))
+#+end_src
+
+#+name: day01_tangle
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle01.clj :exports none :results silent
+  <<code01>>
+#+end_src
+
+#+name: day01_tangle
+#+begin_src clojure :noweb yes :tangle test/aoc18/puzzle01_test.clj :exports none :results silent
+  <<test01>>
+#+end_src
+
+Finally let's run tests:
+
+#+name: day01_tests
+#+begin_src clojure :exports results :results output
+(require '[clojure.test :refer [run-tests]] 'aoc18.puzzle01-test)
+(run-tests 'aoc18.puzzle01-test)
+#+end_src
+
+#+RESULTS: day01_tests
+: 
+: Testing aoc18.puzzle01-test
+: 
+: Ran 1 tests containing 4 assertions.
+: 0 failures, 0 errors.
+
+And get the answer:
+
+#+name: day01_results
+#+begin_src clojure :ns aoc18.puzzle01 :exports results
+  (prn (solve))
+#+end_src
+
+#+RESULTS: day01_results
+: "Elapsed time: 1.956702 msecs"
+: "Elapsed time: 250.630055 msecs"
+: {:part1 595, :part2 80598}
+
+** COMMENT Commentary
+Discussion about apply and reduce
+
+* edit Day 02: Inventory Management System :comp:frequencies:vals_keys:for_loop:
+CLOSED: [2020-01-11 Sat 10:55]
+:PROPERTIES:
+:EXPORT_FILE_NAME: day02
+:EXPORT_HUGO_WEIGHT: 102
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Frequencies, sets and list comprehension (for loop)"
+:END:
+** Puzzle summary
+https://adventofcode.com/2018/day/2
+
+As input we get list of strings made of random letters representing IDs of boxes. The task is to find "checksum" of strings which contain some letters twice multiplied by count of strings which contain triple letters. 
+
+** Descriptions               :noexport:
+*** Part 1
+You stop falling through time, catch your breath, and check the screen on the device. "Destination reached. Current Year: 1518. Current Location: North Pole Utility Closet 83N10." You made it! Now, to find those anomalies.
+
+Outside the utility closet, you hear footsteps and a voice. "...I'm not sure either. But now that so many people have chimneys, maybe he could sneak in that way?" Another voice responds, "Actually, we've been working on a new kind of suit that would let him fit through tight spaces like that. But, I heard that a few days ago, they lost the prototype fabric, the design plans, everything! Nobody on the team can even seem to remember important details of the project!"
+
+"Wouldn't they have had enough fabric to fill several boxes in the warehouse? They'd be stored together, so the box IDs should be similar. Too bad it would take forever to search the warehouse for two similar box IDs..." They walk too far away to hear any more.
+
+Late at night, you sneak to the warehouse - who knows what kinds of paradoxes you could cause if you were discovered - and use your fancy wrist device to quickly scan every box and produce a list of the likely candidates (your puzzle input).
+
+To make sure you didn't miss any, you scan the likely candidate boxes again, counting the number that have an ID containing exactly two of any letter and then separately counting those with exactly three of any letter. You can multiply those two counts together to get a rudimentary checksum and compare it to what your device predicts.
+
+For example, if you see the following box IDs:
+
+#+begin_example
+abcdef contains no letters that appear exactly two or three times.
+bababc contains two a and three b, so it counts for both.
+abbcde contains two b, but no letter appears exactly three times.
+abcccd contains three c, but no letter appears exactly two times.
+aabcdd contains two a and two d, but it only counts once.
+abcdee contains two e.
+ababab contains three a and three b, but it only counts once.
+#+end_example
+
+#+begin_src txt :tangle inputs/day02-ex1
+  abcdef
+  bababc
+  abbcde
+  abcccd
+  aabcdd
+  abcdee
+  ababab
+#+end_src
+
+Of these box IDs, four of them contain a letter which appears exactly twice, and three of them contain a letter which appears exactly three times. Multiplying these together produces a checksum of 4 * 3 = 12.
+
+What is the checksum for your list of box IDs?
+
+*** Part 2
+Confident that your list of box IDs is complete, you're ready to find the boxes full of prototype fabric.
+
+The boxes will have IDs which differ by exactly one character at the same position in both strings. For example, given the following box IDs:
+
+#+begin_src txt :tangle inputs/day02-ex2
+abcde
+fghij
+klmno
+pqrst
+fguij
+axcye
+wvxyz
+#+end_src
+
+The IDs abcde and axcye are close, but they differ by two characters (the second and fourth). However, the IDs fghij and fguij differ by exactly one character, the third (h and u). Those must be the correct boxes.
+
+What letters are common between the two correct box IDs? (In the example above, this is found by removing the differing character from either ID, producing fgij.)
+
+** Solution
+*** Namespace and requirements
+This time I'll explore some ~set~ and ~string~ funcs. (I add ~:rename~ keyword because Clojure complains about renaming ~replace~ from ~clojure.core~ by the func of same name from ~clojure.string.~)
+
+#+name: day02_ns
+#+begin_src clojure :noweb-ref code02 :exports code
+  (ns aoc18.puzzle02
+    (:require [aoc18.utils :refer [input->str]]
+              [clojure.set :as set :refer [difference]]
+              [clojure.string :as string :refer [replace join] :rename {replace rpl}]
+              [clojure.repl :refer [doc]]))
+
+#+end_src
+
+#+begin_src clojure :noweb-ref test02 :exports none
+  (ns aoc18.puzzle02-test
+    (:require [aoc18.utils :refer [input->str]]
+              [aoc18.puzzle02 :refer :all]
+              [clojure.test :refer :all]))
+
+#+end_src
+
+*** Helper: count letter repetitions
+First let's count what are letter repetition ratios in given strings. If a string has no repeated letters our func should return a ~set~ containing 1 which indicates that all letters are used only once. If there are letters repeaded once, set should contain 2 as well, etc.:
+
+#+name: day03_letter_repetition_test
+#+begin_src clojure :noweb-ref test02
+(deftest letter-repetition-test
+  (testing "should return set of letter frequencies"
+    (is (= #{1} (letter-repetition "abcdef")))
+    (is (= #{1 2} (letter-repetition "abcabe")))
+    (is (= #{1 2 3} (letter-repetition "abcabea")))))
+
+#+end_src 
+
+#+name: day02_letter_repetition
+#+begin_src clojure :noweb-ref code02
+  (defn letter-repetition [word] ((comp set vals frequencies) word))
+
+#+end_src
+
+Let's break it down.
+
+~comp~ enables making "composite" funcs instead of writing nested calls. For example:
+
+#+name: day02_comp_example
+#+begin_src clojure :exports code :results silent
+  (assert (= (set (vals (frequencies "noob")))      ;; => #{1 2}
+             ((comp set vals frequencies) "noob"))) ;; => #{1 2}
+#+end_src
+
+Next, ~frequencies~:
+
+#+name: day02_frequencies_doc
+#+begin_src clojure :exports results
+(doc frequencies)
+#+end_src
+
+#+RESULTS: day02_frequencies_doc
+: -------------------------
+: clojure.core/frequencies
+: ([coll])
+:   Returns a map from distinct items in coll to the number of times
+:   they appear.
+
+For example:
+
+#+name: day02_frequencies_example
+#+begin_src clojure :exports code :results code
+  (frequencies "noob")     ;; => {\n 1, \o 2, \b 1}
+#+end_src
+
+~vals~, as expected, would give seq of map's values (as opposite to ~keys~):
+
+#+name: day02_vals_example
+#+begin_src clojure :exports code :results silent
+  (vals {\n 1, \o 2, \b 1})  ;; => (1 2 1)
+  (keys {\n 1, \o 2, \b 1})  ;; => (\n \o \b)
+#+end_src
+
+And finally ~set~ "returns a set of the distinct elements of coll".
+
+*** Helper: doubles and triples
+Since we are interested only in occurences of doubles and triples we may represent each string as a two-element ~vector~ where index 0 indicates doubles (0 if none, 1 if any) and index 1 indicates triples: 
+
+#+name: day02_two_threes_test
+#+begin_src clojure :noweb-ref test02
+(deftest two-threes-test
+  (testing "should return vecor of ones and zeros, where indx 0 indicates if there are
+            doubled letters, and idx 1 -- tripled letters"
+    (is (= [0 0] (two-threes #{1})))
+    (is (= [0 1] (two-threes #{1 3})))
+    (is (= [1 0] (two-threes #{2 4})))
+    (is (= [1 1] (two-threes #{1 2 3 4})))))
+
+#+end_src
+
+At first I wrote this using combined ~if~ statements put into ~[]~ but why not repeat oneself and use ~map~ for fun:
+
+#+name: day02_two_threes
+#+begin_src clojure :noweb-ref code02
+  (defn two-threes [freqs] (vec (map #(if (freqs %) 1 0) [2 3])))
+
+#+end_src
+
+*** Count checksum (part 1)
+Now we are ready to get checksum of all words. I will convert all words to vectors indicating doubles and triples, than multiply the sum of all doubles by the sum of all triples:
+
+#+name: day02_checksum
+#+begin_src clojure :noweb-ref code02
+  (defn checksum [words]
+    (->> words
+         (map (fn [w] (two-threes (letter-repetition w))))
+         (apply map +)
+         (apply *)))
+
+#+end_src
+
+Let's check if it matches exemplary data:
+
+#+name: day02_checksum_test
+#+begin_src clojure :noweb-ref test02
+  (deftest checksum-test
+    (testing "should match puzzle 1 example"
+      (is (= 12 (checksum (input->str "day02-ex1"))))))
+
+#+end_src
+
+*** Helper: compare letters
+Since we have to find common letters in two words which differ exactly by one letter, first we need to find those two similar words.
+
+For given two words I will convert them into sequences and ~map~ them checking if corresponding letters are equal. This will result in a seq of booleans. Feeding it to ~frequencies~ will result in a two-element map where boolenas are keys and their occurences are values. E.g. ~{false 1 true 3}~ means that in two words three letters are the same, but one letter in each word is not matched in another.
+
+#+name: day02_part2
+#+begin_src clojure :noweb-ref code02
+  (defn compare-letters [w1 w2] (frequencies (map = (seq w1) (seq w2))))
+
+#+end_src
+
+Let's see the code in action:
+
+#+name: day02_compare_letters_test
+#+begin_src clojure :noweb-ref test02
+(deftest compare-letters-test
+  (testing "should return hashmap where keys are booleans and values are number of common
+            letters, e.g. {true 3, false 1} means that there are three letters doubled 
+            and one is not common"
+    (is (= {false 4} (compare-letters "asdf" "qwer")))
+    (is (= {true 3 false 1} (compare-letters "asdf" "asdq")))
+    (is (= {true 2 false 2} (compare-letters "asdf" "askl")))))
+
+#+end_src
+
+*** Find similar words
+To find two similar words in a collection I will use ~for~ loop using it's goodies of ~:let~ and ~:when~. In fact it will act as a nested loop because for each word it will filter the whole collection looking for similar word (the ~let~ part) and if (or rather: ~when~) theres a match it will return seq containing similar words. Since I know there will be only one pair it is safe to return the first element of the seq which is returned be the loop. I know it's not the most optimal solution, but for the sake of exploring new forms I'll stick with that for now.
+
+*TODO*: make combinations of all words and using ~loop~ (which enables a "break" behavior) find two similar words.
+
+#+name: day02_find_similar
+#+begin_src clojure :noweb-ref code02
+  (defn find-similar [words]
+    (first
+     (for [w1 words
+           :let [m (filter (fn [w2] (= ((compare-letters w1 w2) false) 1)) words)]
+           :when (seq m)]
+       (conj m w1))))
+
+#+end_src
+
+Let's check how it works:
+#+name: day02_find_similar_test
+#+begin_src clojure :noweb-ref test02
+  (deftest find-similar-test
+    (testing "should return list of two words that differ only by one letter"
+      (is (= '("fghij" "fguij") (find-similar (input->str "day02-ex2"))))))
+
+#+end_src
+
+*** Get common string (part 2)
+When we have two similar words found, getting common string may be accomplished by comparing two strings converted to ~sets~ of letters and replacing the letter which they differ by by an empty string. Or is it an overkill?
+
+#+name: day02_common_str
+#+begin_src clojure :noweb-ref code02
+  (defn common-str [pair]
+    (string/replace (first pair)
+                 ((comp re-pattern str first)
+                  (->> pair
+                       (map set)
+                       (apply set/difference)))
+                 ""))
+
+#+end_src
+
+Second attempt: without using sets -- joining mapping of two words converted into sequencies in terms of identity of letters:
+
+#+name: day02_common_str2
+#+begin_src clojure :noweb-ref code02
+  (defn common-str2 [[w1 w2]]
+    (string/join (map (fn [l1 l2] (if (= l1 l2) l1)) (seq w1) (seq w2))))
+
+#+end_src
+  
+Now check if they are compatible:
+
+#+name: day02_common_str_test
+#+begin_src clojure :noweb-ref test02
+  (deftest example2-test
+    (testing "should match puzzle2 example"
+      (let [words (find-similar (input->str "day02-ex2"))]
+        (is (= "fgij" (time (common-str words))))
+        (is (= "fgij" (time (common-str2 words)))))))
+
+  ;; the test above is tricky because all letters are already sorted alphabetically
+  ;; we need to test words which have random order of letters
+
+  (deftest common-str-test
+    (testing "should return the same string"
+      (let [words '("waxyhi" "wexyhi")]
+        (is (= "wxyhi" (time (common-str words))))
+        (is (= "wxyhi" (time (common-str2 words)))))))
+
+#+end_src
+
+*** Putting things together
+#+name: day02_solve
+#+begin_src clojure :noweb-ref code02
+  (defn solve []
+    (let [inp (input->str "day02")
+          words (find-similar inp)]
+      {:part1 (time (checksum inp))
+       :part2-1 (time (common-str words))
+       :part2-2 (time (common-str2 words))}))
+
+#+end_src
+
+Run tests:
+
+#+name: day02_tangle
+#+begin_src clojure :noweb yes :tangle test/aoc18/puzzle02_test.clj :exports none
+  <<test02>>
+#+end_src
+
+#+name: day02_tests
+#+begin_src clojure :results output :exports results
+  (require '[clojure.test :refer [run-tests]] 'aoc18.puzzle02-test)
+  (run-tests 'aoc18.puzzle02-test)
+#+end_src
+
+#+RESULTS: day02_tests
+: 
+: Testing aoc18.puzzle02-test
+: "Elapsed time: 0.042699 msecs"
+: "Elapsed time: 0.016143 msecs"
+: "Elapsed time: 0.028304 msecs"
+: "Elapsed time: 0.011218 msecs"
+: 
+: Ran 7 tests containing 16 assertions.
+: 0 failures, 0 errors.
+
+Get the answer:
+
+#+name: day02_tangle
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle02.clj :exports none
+  <<code02>>
+#+end_src
+
+#+RESULTS: day02_tangle
+
+#+name: day02_results
+#+begin_src clojure :exports results :ns aoc18.puzzle02
+  (prn (solve))
+#+end_src
+
+#+RESULTS: day02_results
+: "Elapsed time: 7.848962 msecs"
+: "Elapsed time: 0.106668 msecs"
+: "Elapsed time: 0.035794 msecs"
+: {:part1 5456, :part2-1 "megsdlpulxvinkatfoyzxcbvq", :part2-2 "megsdlpulxvinkatfoyzxcbvq"}
+
+** COMMENT Commentary
+New stuff [0/6] 
+- [ ] comp
+- [ ] frequencies
+- [ ] vals/keys
+- [ ] for loop
+- [ ] apply map +
+- [ ] tests: some? seq empty? etc
+- [ ] about order in sequences
+
+* edit Day 03: No Matter How You Slice It :reduce:update:zipmap:upacking:re_seq:
+CLOSED: [2020-01-12 Sun 21:04]
+:PROPERTIES:
+:EXPORT_FILE_NAME: day03
+:EXPORT_HUGO_WEIGHT: 103
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Discovering magic of reduce, update and some syntactic sugars"
+:END:
+** Puzzle summary
+https://adventofcode.com/2018/day/3
+
+Input is a list of strings like ~#1 @ 393,863: 11x29~ representing an elf's "claim" where ~#1~ represents claim's id, ~393,863~ represents points x, y of upper left vertex of a rectangle on the cartesian grid and ~11x29~ indicate width and height of the rectangle.
+
+Our task is to find number of points on the grid covered potentially by the claims (part 1) and find the only one rectangle which does not overlap with others (part 2). 
+ 
+** Descriptions               :noexport:
+*** Part 1
+The Elves managed to locate the chimney-squeeze prototype fabric for Santa's suit (thanks to someone who helpfully wrote its box IDs on the wall of the warehouse in the middle of the night). Unfortunately, anomalies are still affecting them - nobody can even agree on how to cut the fabric.
+
+The whole piece of fabric they're working on is a very large square - at least 1000 inches on each side.
+
+Each Elf has made a claim about which area of fabric would be ideal for Santa's suit. All claims have an ID and consist of a single rectangle with edges parallel to the edges of the fabric. Each claim's rectangle is defined as follows:
+
+The number of inches between the left edge of the fabric and the left edge of the rectangle.
+
+The number of inches between the top edge of the fabric and the top edge of the rectangle.
+The width of the rectangle in inches.
+The height of the rectangle in inches.
+
+A claim like #123 @ 3,2: 5x4 means that claim ID 123 specifies a rectangle 3 inches from the left edge, 2 inches from the top edge, 5 inches wide, and 4 inches tall. Visually, it claims the square inches of fabric represented by # (and ignores the square inches of fabric represented by .) in the diagram below:
+
+#+begin_example
+...........
+...........
+...#####...
+...#####...
+...#####...
+...#####...
+...........
+...........
+...........
+#+end_example
+
+The problem is that many of the claims overlap, causing two or more claims to cover part of the same areas. For example, consider the following claims:
+
+#+begin_src txt :tangle inputs/day03-ex
+#1 @ 1,3: 4x4
+#2 @ 3,1: 4x4
+#3 @ 5,5: 2x2
+#+end_src
+
+Visually, these claim the following areas:
+
+#+begin_example
+........
+...2222.
+...2222.
+.11XX22.
+.11XX22.
+.111133.
+.111133.
+........
+#+end_example
+
+The four square inches marked with X are claimed by both 1 and 2. (Claim 3, while adjacent to the others, does not overlap either of them.)
+
+If the Elves all proceed with their own plans, none of them will have enough fabric. How many square inches of fabric are within two or more claims?
+*** Part 2
+Amidst the chaos, you notice that exactly one claim doesn't overlap by even a single square inch of fabric with any other claim. If you can somehow draw attention to it, maybe the Elves will be able to make Santa's suit after all!
+
+For example, in the claims above, only claim 3 is intact after all claims are made.
+
+What is the ID of the only claim that doesn't overlap?
+
+** Solution
+*** Namespace and requirements
+Besides of usual input parsing I will use ~difference~ and ~union~ from ~clojure.set~.
+
+#+name: day03_ns
+#+begin_src clojure :noweb-ref code03
+  (ns aoc18.puzzle03
+    (:require [aoc18.utils :refer [input->str]]
+              [clojure.set :refer [difference union]]))
+
+#+end_src
+
+#+name: day03_tests
+#+begin_src clojure :noweb-ref test03 :exports none
+  (ns aoc18.puzzle03-test
+    (:require
+     [aoc18.puzzle03 :refer :all]
+     [clojure.test :refer :all]))
+
+#+end_src
+
+*** Parsing the claim
+Claims look like ~#123 @ 3,2: 5x4~ and we are interested only in numbers and their orded. I'll parse each claim and put all numbers into a ~hash-map~ with keys ~:id~, ~:x~, ~:y~, ~:widht~
+and ~:height~.
+
+#+begin_src clojure :noweb-ref test03
+(deftest parse-claim-test
+  (testing "Should return all numbers found in given str ordered by keys in a hash map"
+    (is (= {:id 1 :x 393 :y 863 :width 11 :height 29}
+           (parse-claim "#1 @ 393,863: 11x29")))))
+
+#+end_src
+
+Since we are interested only in numbers we can easily parse each claim using ~re-seq~ with simple regex ~#\d+~. Then, after converting strings to integers we can zip those numbers with keys of map which we want to create using ~zipmap~ func:
+
+#+name: day03_parse
+#+begin_src clojure :noweb-ref code03
+  (defn parse-claim
+    "Returns a map where keys are claim id, x, y, width and height"
+    [claim]
+    (->> claim
+         (re-seq #"\d+")
+         (map #(Integer/parseInt %))
+         (zipmap [:id :x :y :width :height])))
+
+#+end_src
+
+*** First attempt
+At this point I tried to write a solution using ~loop~ form. As you can see it turned out to be quite long and complex (using three ~recur~ forms and nested ~if~ statements. It worked! But... 
+
+#+name: day03_old
+#+begin_src clojure :results output :exports code
+  (defn count-overlapping
+    "Checks all points covered by rectangle RECT, updating overlapping points and claims"
+    [[s c o] rect]
+    (loop [[xy & rest] (covered-by rect)
+           seen s
+           claims c
+           overlapping o]
+      (let [this (rect :id)
+            other (seen xy)]
+        (if (empty? xy)
+          [seen claims overlapping]
+          (if (some? other)
+              (if (> (count other) 1)
+                (recur rest seen (union claims other #{this}) overlapping)
+                (recur rest
+                       (assoc seen xy (conj other this))
+                       (union claims other #{this})
+                       (+ 1 overlapping)))
+              (recur rest (conj seen {xy #{this}}) claims overlapping))))))
+
+
+  (defn solve []
+    (let [input (map parse-claim (input->str "day03"))
+          [_ overlapping-claims counter] (reduce count-overlapping [{} #{} 0] input)]
+      {:part1 counter
+       :part2 (first (difference (set (map :id input)) overlapping-claims))}))
+#+end_src
+
+... I realized that something is not right since the func returns data which I don't need and does some unnecessary computations storing part of the solution in a separate ~counter~ variable.
+
+So I started to refactor by eliminating what was unnecessary and making the code more modular. I eventually could considerable shorten the ~loop~ form to only one ~recur~ using two short helper funcs: first getting area covered by a rectangle in terms of cartesian coordinates; second used just to update ~hash-map~ of all points ever covered by a claim. 
+
+*** Helper: get area covered by a rectangle
+Having all claims transferred to managable data structure I need to get all points in the cartesian grid covered by given claim's rectangle. For example square with coordinates of upper left vertex ~x = 1~, ~y = 1~ and width of 2 covers points ~(1, 1)~, ~(1, 2)~, ~(2, 1)~ and ~(2, 2)~:
+
+#+begin_src clojure :noweb-ref test03
+  (deftest covered-by-test
+    (testing "Should return a seq of vectors containing x and y positions of a rectangle 
+              passed as an arg"
+      (is (= '([1 1] [1 2] [2 1] [2 2])
+             (covered-by {:id 1 :x 1 :y 1 :width 2 :height 2})))))
+
+#+end_src
+
+# TODO: link syntactic sugar to the Commentary section
+Since we need only certain values from a hash-map where we store the data, we may unpack them using some syntactic sugar while passing arguments. Thanks to that I won't have to write ~let~ form to unpack and bind values to temporary variables. Then a simple ~for~ loop will do:
+
+#+name: day03_covered
+#+begin_src clojure :noweb-ref code03
+  (defn covered-by
+    "Returns all points [x y] covered by rectangle RECT"
+    [{:keys [x y width height]}]          ; unpack only needed values
+    (for [xx (range x (+ x width))
+          yy (range y (+ y height))]
+      [xx yy]))
+
+#+end_src
+
+*** Helper: update seen points
+This func will be used by ~update~ func later. What is worth noting here is argument ~old~
+which will be passed automatically by the ~update~ func. The second arg uses unpacking sugar assigning value of the ~:id~ key from map passed as arg to temporary variable ~id~. 
+~some?~ returns true if x is not nil, false otherwise.
+
+#+name: day03_update-seen
+#+begin_src clojure :noweb-ref code03
+  (defn update-seen
+    "Take old value and assign to 'id' var value of :id key in passed arg. Magic!"
+    [old {id :id}]
+    (if (some? old) (conj old id) #{id}))
+
+#+end_src
+
+To see how this should work we have to put the func into the contex of ~update~. I will check both cases of the desired behavior:
+
+#+begin_src clojure :noweb-ref test03
+(deftest update-seen-replaces-test
+  (testing "Should update old value adding new"
+    (let [before {"a" #{1}}
+          after (update before "a" update-seen {:id 2})]
+      (is (= #{1 2} (get after "a"))))))
+
+(deftest update-seen-creates-test
+  (testing "Should create new value because there was none"
+    (let [before {}
+          after (update before "a" update-seen {:id 3})]
+      (is (= #{3} (get after "a"))))))
+
+#+end_src
+
+*** Refactoring with loop
+Finally I got this func which could be used with ~redce~ on parsed claims:
+
+#+name: day03_loop
+#+begin_src clojure :noweb-ref code03
+  (defn loop-overlapping
+    "Checks all points covered by rectangle RECT, updating overlapping points and claims"
+    [s rect]
+    (loop [[xy & rest] (covered-by rect)
+           seen s]
+      (if (empty? xy)
+        seen
+        (recur rest (update seen xy update-seen rect)))))
+
+#+end_src
+
+*** Further refactoring with reduce
+Then I found a similar solution which was using ~reduce~ instead of ~loop~ which was more convenient because it enabled further slimming down the code and, hmm, reducing more unnecessary data. 
+
+#+name: day03_reduce
+#+begin_src clojure :noweb-ref code03
+  (defn reduce-overlapping
+    "Checks all points covered by rectangle RECT, updating overlapping points and claims"
+    [claims]
+    (reduce (fn [seen rect]
+              ; old is passed automatically?
+              (reduce (fn [seen xy] (update seen xy update-seen rect)) 
+                      seen (covered-by rect)))
+            {} claims))
+
+#+end_src
+
+To compare both funcs we may put them into one test:
+ 
+#+name: day03_loop_and_reduce_test
+#+begin_src clojure :noweb-ref test03
+(deftest loop-and-reduce-overlapping-test
+  (testing "Should return hash map where keys are x, y positions and values are ids of 
+            rectangles covering those positions"
+    (let [rects [{:id "a" :x 1 :y 1 :width 2 :height 2}
+                 {:id "b" :x 2 :y 2 :width 2 :height 2}]
+          seen {}
+          expected {[1 1] #{"a"}
+                    [2 1] #{"a"}
+                    [1 2] #{"a"}
+                    [2 2] #{"a" "b"}
+                    [3 2] #{"b"}
+                    [2 3] #{"b"}
+                    [3 3] #{"b"}}]
+      (is (= expected (reduce loop-overlapping seen rects)))
+      (is (= expected (reduce-overlapping rects))))))
+
+#+end_src
+
+*** Putting things together
+#+name: day03_solve
+#+begin_src clojure :noweb-ref code03
+  (defn solve
+    "First we parse  input data with regexes  making seq of vectors  mapped with appripriate
+    keys.
+    Funcs `reduce-overlapping' and `loop-overlapping' return dict where keys are positions
+    on the xy grid and values are sets of rectangle ids.
+    Part 1: to get all overlap positions we have to find all points which are claimed at
+    least by two rectangles.
+    Part 2: to find the one exclusively non overlapping rectangle we have to find difference
+    between all ids and the set of ids of all points which are claimed by more than one
+    rectangle."
+    [file]
+    (let [input (map parse-claim (input->str file))
+          ;; claims (vals (reduce loop-overlapping {} input))
+          claims (time (vals (reduce-overlapping input)))]
+      {:part1 (time (->> claims
+                         (map count)
+                         (filter #(>= % 2))
+                         count))
+       :part2 (time (first
+                     (difference
+                      (->> input (map :id) set)
+                      (->> claims
+                           (filter #(> (count %) 1))
+                           (apply union)))))}))
+
+#+end_src
+
+Let's check if this works for exemplary data:
+
+#+begin_src clojure :noweb-ref test03
+  (deftest example-test
+    (testing "should return 4 for the first part and 3 for the second "
+      (is (= {:part1 4 :part2 3}
+             (solve "day03-ex")))))
+#+end_src
+
+#+name: day03_tangle
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle03.clj :exports none :results silent
+  <<code03>>
+#+end_src
+
+Run tests:
+#+name: day03_tests_tangle
+#+begin_src clojure :noweb yes :tangle test/aoc18/puzzle03_test.clj :exports none :results silent
+  <<test03>>
+#+end_src
+
+#+name: day03_tests
+#+begin_src clojure :results output :exports results
+  (require '[clojure.test :refer [run-tests]] 'aoc18.puzzle03-test)
+  (run-tests 'aoc18.puzzle03-test)
+#+end_src
+
+#+RESULTS: day03_tests
+: 
+: Testing aoc18.puzzle03-test
+: "Elapsed time: 0.436003 msecs"
+: "Elapsed time: 0.040985 msecs"
+: "Elapsed time: 0.099504 msecs"
+: 
+: Ran 6 tests containing 7 assertions.
+: 0 failures, 0 errors.
+
+Get the answer:
+
+#+name: day03_result
+#+begin_src clojure :ns aoc18.puzzle03 :exports results
+  (prn (solve "day03"))
+#+end_src
+
+#+RESULTS: day03_result
+: "Elapsed time: 1948.021728 msecs"
+: "Elapsed time: 260.814256 msecs"
+: "Elapsed time: 344.227857 msecs"
+: {:part1 98005, :part2 331}
+
+** COMMENT Commentary
+- [ ] re-seq
+- [ ] zip-map
+- [ ] {:keys [x y etc]} → syntactic sugar
+* edit Day 04: Repose Record  :some:val:key:
+CLOSED: [2020-01-18 Sat 18:22]
+:PROPERTIES:
+:EXPORT_FILE_NAME: day04
+:EXPORT_HUGO_WEIGHT: 104
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Parsing with regexes, loops with hash-maps. Fully TDDed!"
+:END:
+** Puzzle summary
+https://adventofcode.com/2018/day/4
+
+As input we get list of strings like ="[1518-03-10 23:57] Guard #73 begins shift"= or ="... falls asleep"= / ="... wakes up"=. The list should be sorted and parsed to get information about amount of minutes of each guard was asleep. Then we need to find the guard which was asleep the most and find the minute on which he was statistically asleep the most. Puzzle answer is guard's ID multiplied by the chosen minute.
+
+For part 2 we need to find the guard which has the highest occurence of one minute during which he was asleep. Answer is counted in the same way as in part 1.
+
+** Descriptions               :noexport:
+*** Part 1
+You've sneaked into another supply closet - this time, it's across from the prototype suit manufacturing lab. You need to sneak inside and fix the issues with the suit, but there's a guard stationed outside the lab, so this is as close as you can safely get.
+
+As you search the closet for anything that might help, you discover that you're not the first person to want to sneak in. Covering the walls, someone has spent an hour starting every midnight for the past few months secretly observing this guard post! They've been writing down the ID of the one guard on duty that night - the Elves seem to have decided that one guard was enough for the overnight shift - as well as when they fall asleep or wake up while at their post (your puzzle input).
+
+For example, consider the following records, which have already been organized into chronological order:
+
+#+begin_src txt :tangle inputs/day04-ex
+[1518-11-01 00:00] Guard #10 begins shift
+[1518-11-01 00:05] falls asleep
+[1518-11-01 00:25] wakes up
+[1518-11-01 00:30] falls asleep
+[1518-11-01 00:55] wakes up
+[1518-11-01 23:58] Guard #99 begins shift
+[1518-11-02 00:40] falls asleep
+[1518-11-02 00:50] wakes up
+[1518-11-03 00:05] Guard #10 begins shift
+[1518-11-03 00:24] falls asleep
+[1518-11-03 00:29] wakes up
+[1518-11-04 00:02] Guard #99 begins shift
+[1518-11-04 00:36] falls asleep
+[1518-11-04 00:46] wakes up
+[1518-11-05 00:03] Guard #99 begins shift
+[1518-11-05 00:45] falls asleep
+[1518-11-05 00:55] wakes up
+#+end_src
+
+Timestamps are written using year-month-day hour:minute format. The guard falling asleep or waking up is always the one whose shift most recently started. Because all asleep/awake times are during the midnight hour (00:00 - 00:59), only the minute portion (00 - 59) is relevant for those events.
+
+Visually, these records show that the guards are asleep at these times:
+
+#+begin_example
+Date   ID   Minute
+            000000000011111111112222222222333333333344444444445555555555
+            012345678901234567890123456789012345678901234567890123456789
+11-01  #10  .....####################.....#########################.....
+11-02  #99  ........................................##########..........
+11-03  #10  ........................#####...............................
+11-04  #99  ....................................##########..............
+11-05  #99  .............................................##########.....
+#+end_example
+
+The columns are Date, which shows the month-day portion of the relevant day; ID, which shows the guard on duty that day; and Minute, which shows the minutes during which the guard was asleep within the midnight hour. (The Minute column's header shows the minute's ten's digit in the first row and the one's digit in the second row.) Awake is shown as ., and asleep is shown as #.
+
+Note that guards count as asleep on the minute they fall asleep, and they count as awake on the minute they wake up. For example, because Guard #10 wakes up at 00:25 on 1518-11-01, minute 25 is marked as awake.
+
+If you can figure out the guard most likely to be asleep at a specific time, you might be able to trick that guard into working tonight so you can have the best chance of sneaking in. You have two strategies for choosing the best guard/minute combination.
+
+Strategy 1: _Find the guard that has the most minutes asleep_. What minute does that guard spend asleep the most?
+
+In the example above, Guard #10 spent the most minutes asleep, a total of 50 minutes (20+25+5), while Guard #99 only slept for a total of 30 minutes (10+10+10). Guard #10 was asleep most during minute 24 (on two days, whereas any other minute the guard was asleep was only seen on one day).
+
+While this example listed the entries in chronological order, your entries are in the order you found them. You'll need to organize them before they can be analyzed.
+
+_What is the ID of the guard you chose multiplied by the minute you chose_? (In the above example, the answer would be 10 * 24 = 240.)
+*** Part 2
+Strategy 2: Of all guards, which guard is most frequently asleep on the same minute?
+
+In the example above, Guard #99 spent minute 45 asleep more than any other guard or minute - three times in total. (In all other cases, any guard spent any minute asleep at most twice.)
+
+What is the ID of the guard you chose multiplied by the minute you chose? (In the above example, the answer would be 99 * 45 = 4455.)
+
+** Solution
+*** Namespace :noexport:
+#+name: day04_ns
+#+begin_src clojure :noweb-ref code04 :results silent :exports none
+  (ns aoc18.puzzle04 [:require [aoc18.utils :refer [input->str]]])
+
+#+end_src
+
+#+name: test04_ns
+#+begin_src clojure :noweb-ref test04 :results silent :exports none
+  (ns aoc18.puzzle04-test
+    (:require [aoc18.puzzle04 :refer :all]
+              [aoc18.utils :refer [input->str]]
+              [clojure.test :refer :all]))
+
+#+end_src
+
+*** Parsing the logs
+Let's grab all needed data (namely minute and, optionally, Guard's ID) using one func which should work like this:
+#+name: day04_parse_test
+#+begin_src clojure :noweb-ref test04 :exports code
+  (deftest parse-test
+    (testing "parse data and return hash-map with minutes and id if present"
+      (is (= '(57 73) (parse "[1518-03-10 23:57] Guard #73 begins shift")))
+      (is (= '(22 nil) (parse "[1518-03-11 00:22] wakes up")))))
+
+#+end_src
+
+The func should parse input with simple regex, than take searched groups (this is why I use ~rest~ because first group is the whole matched phrase) and convert matched strings to integers:
+ 
+#+name: day04_parse
+#+begin_src clojure :noweb-ref code04 
+  (defn parse [log]
+    (->> log
+         (re-find #":(\d+)] (?:Guard #(\d+)|.)")
+         rest
+         (map #(if % (Integer/parseInt %) nil))))
+
+#+end_src
+
+Next, we need to process all log entries to get full info about each guard.
+To accomplish that I will reduce all inputs using a ~hash-map~ where keys would be guards' ids and vals would be all minutes gathered from logs. The func should behave like that:
+
+*** Get all data into a managable structure
+#+name: day04_check_in_test
+#+begin_src clojure :noweb-ref test04
+  (deftest check-in-test
+    (testing "should return hash-map with ids and minutes"
+      (is (= {10 [5 25 30 55 24 29], 99 [40 50 36 46 45 55]}
+             (check-in (input->str "day04-ex"))))))
+
+#+end_src
+
+(Where input is taken from the puzzle exemple.)
+
+#+name: day04_check_in
+#+begin_src clojure :noweb-ref code04
+  (defn check-in [logs]
+    (first
+     (reduce
+      (fn [[guards last] log]
+        (let [[m id] (parse log)]
+          (if id
+            [(update guards id (fn [old] (or old []))) id]
+            [(update guards last (fn [old] (conj (or old []) m))) last])))
+      [{} nil]
+      logs)))
+
+#+end_src
+#+name: day04_test_tangle
+
+*** Helper: vec of ints to vec of 2-el-lists
+Because I process only one input at a time, I don't know hom many minute ranges there will be for each guard. To fix output we need a simple helper which will convert vector of minutes to vector of lists containing falling asleep and waking up minute:
+ 
+#+begin_src clojure :noweb-ref test04 :exports code
+  (deftest get-ranges-test
+    (testing "should split vector of ints into a vector of lists - pairs"
+      (is (= ['(1 2) '(3 4) '(5 6)] (get-ranges [1 2 3 4 5 6])))))
+
+#+end_src
+
+I will loop over vector of minutes taking one pair each time until the list is exhausted:
+
+#+name: day04_ranges
+#+begin_src clojure :noweb-ref code04
+  (defn get-ranges [minutes]
+    (loop [pair (take 2 minutes)
+           rest (drop 2 minutes)
+           vec []]
+      (if (empty? pair)
+        vec
+        (recur (take 2 rest) (drop 2 rest) (conj vec pair)))))
+
+#+end_src
+
+*** Helper: count sleepy minutes
+Once we've got data ready to process we need to count minutes in given ranges. I will store minutes in a ~hash-map~ where keys are minutes and vals are occurences of a given minute throughout all logs of a guard:
+
+#+name: day04_count_sleepy_test
+#+begin_src clojure :noweb-ref test04
+  (deftest count-sleepy-test
+    (testing "should return hash-map of minutes and their occurences"
+      (is (= {1 1, 2 2, 3 2, 4 1, 5 1}
+             (count-sleepy [1 4 4 6 2 4 ])))))
+
+#+end_src 
+
+First I process minutes' vec with ~get-ranges~ than I cast the vec of ranges to double reduce func which will convert vec of sleep ranges into a range of numbers which will be used to update ~hash-map~ of all counted minutes (if given minute is already in the map, increase the counter by one, otherwise update the value for this minute with value of 1.
+
+#+name: day04_count_sleepy
+#+begin_src clojure :noweb-ref code04 
+  (defn count-sleepy [minutes]
+    (->> minutes
+         get-ranges
+         (reduce
+          (fn [counted sleep-range]
+            (reduce
+             (fn [counted minute]
+               (update counted minute (fn [count] (if count (inc count) 1))))
+             counted
+             (apply range sleep-range)))
+          {})))
+
+#+end_src
+
+*** Process each guard data
+To solve part 1 we need info about sum of minutes slept by each guard and the minute in which the guard was sleeping the most. 
+
+#+begin_src clojure :noweb-ref test04
+  (deftest process-guard-data-test
+    (testing "should return hash-map with keys :minute :occurence and :sleep-time"
+      (is (= '({:minute 24, :occurence 2, :sleep-time 50}
+               {:minute 45, :occurence 3, :sleep-time 30})
+             (map process-guard-data
+                  [[5 25 30 55 24 29]
+                   [40 50 36 46 45 55]])))))
+
+#+end_src
+
+Having all minutes stored in a ~hash-map~ we need only to apply ~max~ and ~+~ on values of each guard's map to get the most sleepy minute and all minutes slept respectively. Then we need to find the minute which had the highest occurence count. 
+
+#+name: day04_find_max_min
+#+begin_src clojure :noweb-ref code04 
+  (defn process-guard-data [minutes]
+    (let [counted (count-sleepy minutes)
+          minute_count (apply max (vals counted))
+          sum (apply + (vals counted))]
+      (some
+       #(when (= (val %) minute_count)
+          {:minute (key %) :occurence minute_count :sleep-time sum})
+       counted)))
+
+#+end_src
+
+*** Convert logs into vec of maps
+Now we can start to put all pieces together and get the results.
+First we have to process all the logs to get a ~vec~ of ~maps~ with info about guard ~:id~ and processed sleep times. 
+
+For puzzle example data we should get result like this:
+#+name: day04_process_logs_test
+#+begin_src clojure :noweb-ref test04
+  (deftest process-logs-test
+    (testing "should meet puzzle 4 example data"
+      (is (= [{:id 10, :minute 24, :occurence 2, :sleep-time 50}
+              {:id 99, :minute 45, :occurence 3, :sleep-time 30}]
+             (process-logs (check-in (input->str "day04-ex")))))))
+
+#+end_src
+
+#+name: day04_process_logs
+#+begin_src clojure :noweb-ref code04
+  (defn process-logs [logs]
+    (reduce
+     (fn [guards [id minutes]]
+       (conj guards (merge {:id id} (process-guard-data minutes))))
+     [] logs)) 
+
+#+end_src
+
+*** Find guard satisfying certain criteria
+To solve part 1 we need to find the guard with the longes sleep time, while to solve part 2 we need a guard which has highest frequency of one minute slept. Let's put it into one func which will find a guard using given criterium:
+ 
+#+name: day04_find_guard_with_most
+#+begin_src clojure :noweb-ref code04
+  (defn find-guard-with-most [what? logs]
+    (reduce (fn [prev guard]
+              (if (> (guard what?) (prev what?))
+                guard prev))
+            {:id nil :minute nil :occurence 0 :sleep-time 0}
+            logs))
+
+#+end_src
+
+*** Getting the results
+We are asked to return id number of chosen guard multiplied by the most slept minute:
+
+#+name: day04_result
+#+begin_src clojure :noweb-ref code04
+  (defn result [{:keys [id minute]}]
+    (* id minute))
+
+#+end_src
+
+
+Let's put everything together (it appeared that there are virtuous guards who never sleep on duty, so we need to filter logs with ~#(seq (last %)))~ which will exclude empty data):
+
+#+name: day04_solve
+#+begin_src clojure :noweb-ref code04 :results none
+  (defn solve [input]
+    (let [logs (->> input
+                    input->str
+                    sort
+                    check-in
+                    (filter #(seq (last %)))
+                    process-logs)]
+      {:part1 (time (result (find-guard-with-most :sleep-time logs)))
+       :part2 (time (result (find-guard-with-most :occurence logs)))}))
+
+#+end_src
+
+Let's check if our solution passes the example data. 
+#+name: day04_example_test
+#+begin_src clojure :noweb-ref test04 
+  (deftest example-test
+    (testing "should return 240 for the first part, and 4455 fot the second"
+      (is (= {:part1 240 :part2 4455} (solve "day04-ex")))))
+
+#+end_src 
+
+#+begin_src clojure :noweb yes :tangle test/aoc18/puzzle04_test.clj :exports none :results silent
+  <<test04>>
+#+end_src
+
+Run all tests:
+
+#+name: day04_tests
+#+begin_src clojure :results output :exports results
+  (require '[clojure.test :refer [run-tests]] 'aoc18.puzzle04-test)
+  (run-tests 'aoc18.puzzle04-test)
+#+end_src
+
+#+RESULTS: day04_tests
+: 
+: Testing aoc18.puzzle04-test
+: "Elapsed time: 0.010137 msecs"
+: "Elapsed time: 0.010751 msecs"
+: 
+: Ran 7 tests containing 8 assertions.
+: 0 failures, 0 errors.
+
+#+name: day04_tangle
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle04.clj :exports none
+  <<code04>>
+#+end_src
+
+Get the answer:
+
+#+name: day04_results>
+#+begin_src clojure :ns aoc18.puzzle04 :exports results
+(prn (solve "day04"))
+#+end_src
+
+#+RESULTS: day04_results>
+: "Elapsed time: 0.024787 msecs"
+: "Elapsed time: 0.022204 msecs"
+: {:part1 3212, :part2 4966}
+
+
+** COMMENT Commentary
+* edit Day 05: Alchemical Reduction :peek:pop:remove:queue:
+CLOSED: [2020-01-22 Wed 11:31]
+:PROPERTIES:
+:EXPORT_FILE_NAME: day05
+:EXPORT_HUGO_WEIGHT: 105
+ :EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Peek and pop: building a simple queue"
+:END:
+** Puzzle summary
+https://adventofcode.com/2018/day/5
+
+As input we get string of 50.000 chars which is referred to as a "polymer". Polymer consists of units which correspond to letters. Units are of the same type when referring to the same letter of alphabet but differ by "polarity" when their case is different. Polymer reacts in the way that neighbor units of the same type and opposite polarity consume each other, namely string like ~Aa~ or ~bB~ would disappear. Our task is to find the lenght of the polymer after all reactions take place.
+
+For example string ~dabAcCaCBAcCcaDA~ produces 10-char long polymer ~dabCBAcaDA~.
+
+** Descriptions :noexport:
+*** Part 1
+You've managed to sneak in to the prototype suit manufacturing lab. The Elves are making decent progress, but are still struggling with the suit's size reduction capabilities.
+
+While the very latest in 1518 alchemical technology might have solved their problem eventually, you can do better. You scan the chemical composition of the suit's material and discover that it is formed by extremely long polymers (one of which is available as your puzzle input).
+
+The polymer is formed by smaller units which, when triggered, react with each other such that two adjacent units of the same type and opposite polarity are destroyed. Units' types are represented by letters; units' polarity is represented by capitalization. For instance, r and R are units with the same type but opposite polarity, whereas r and s are entirely different types and do not react.
+
+For example:
+
+In aA, a and A react, leaving nothing behind.
+In abBA, bB destroys itself, leaving aA. As above, this then destroys itself, leaving nothing.
+In abAB, no two adjacent units are of the same type, and so nothing happens.
+In aabAAB, even though aa and AA are of the same type, their polarities match, and so nothing happens.
+Now, consider a larger example, dabAcCaCBAcCcaDA:
+
+dabAcCaCBAcCcaDA  The first 'cC' is removed.
+dabAaCBAcCcaDA    This creates 'Aa', which is removed.
+dabCBAcCcaDA      Either 'cC' or 'Cc' are removed (the result is the same).
+dabCBAcaDA        No further actions can be taken.
+After all possible reactions, the resulting polymer contains 10 units.
+
+How many units remain after fully reacting the polymer you scanned? (Note: in this puzzle and others, the input is large; if you copy/paste your input, make sure you get the whole thing.)
+
+*** Part 2
+Time to improve the polymer.
+
+One of the unit types is causing problems; it's preventing the polymer from collapsing as much as it should. Your goal is to figure out which unit type is causing the most problems, remove all instances of it (regardless of polarity), fully react the remaining polymer, and measure its length.
+
+For example, again using the polymer dabAcCaCBAcCcaDA from above:
+
+Removing all A/a units produces dbcCCBcCcD. Fully reacting this polymer produces dbCBcD, which has length 6.
+Removing all B/b units produces daAcCaCAcCcaDA. Fully reacting this polymer produces daCAcaDA, which has length 8.
+Removing all C/c units produces dabAaBAaDA. Fully reacting this polymer produces daDA, which has length 4.
+Removing all D/d units produces abAcCaCBAcCcaA. Fully reacting this polymer produces abCBAc, which has length 6.
+In this example, removing all C/c units was best, producing the answer 4.
+
+What is the length of the shortest polymer you can produce by removing all units of exactly one type and fully reacting the result?
+
+** Solution
+*** Namespace :noexport:
+#+name: day05_ns
+#+begin_src clojure :noweb-ref code05 :results silent :exports none
+  (ns aoc18.puzzle05 (:require [aoc18.utils :refer [input->str]]
+                               [clojure.repl :refer [doc]]))
+
+#+end_src
+
+#+name: test05_ns
+#+begin_src clojure :noweb-ref test05 :results silent :exports none
+  (ns aoc18.puzzle05-test
+    (:require [aoc18.puzzle05 :refer :all]
+              [clojure.test :refer :all]))
+
+#+end_src
+
+*** Helper: find matching letters
+Since reaction consists of "consuming" units of the same type but opposite polarity which means the same letters of opposite case we could use ~Character/isUpperCase~ to build a simple function ~upper?~ and look for two chars which reduced to the same case (by ~clojure.string/lower-case~ for example) are equal but differ cases. But this is somewhat tedious. Much simpler solution will be to convert chars to integers because this reduces whole logic to one calculation: checking if absolute difference between two ints is 32 (this being the difference between lowercase and uppercase letters represented by ints). 
+
+#+name: day04_chars_to_ints
+#+begin_src clojure :exports both :results output
+  (prn (map char (range 97 123)))
+  (prn (map char (map #(- % 32) (range 97 123))))
+#+end_src
+
+#+RESULTS: day04_chars_to_ints
+: (\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z)
+: (\A \B \C \D \E \F \G \H \I \J \K \L \M \N \O \P \Q \R \S \T \U \V \W \X \Y \Z)
+
+This should return ~nil~ or throw an exception:
+
+#+name: day05_assert
+#+begin_src clojure :exports code :results code 
+  (assert (= (- (int \a) (int \A)) 32))   ;; => nil
+#+end_src
+
+Good. So our helper func would look like this:
+
+#+name: day05_match
+#+begin_src clojure :noweb-ref code05 
+(defn match? [a b] (= (java.lang.Math/abs (- a b)) 32))
+
+#+end_src
+
+Let's test it:
+
+#+name: day05_match_test
+#+begin_src clojure :noweb-ref test05
+  (deftest match-test
+    (testing "the same letters compared should return true, otherwise false"
+      (is (= true  (reduce match? (map int [\A \a]))))
+      (is (= true  (reduce match? (map int [\b \B]))))
+      (is (= false (reduce match? (map int [\c \D]))))
+      (is (= false (reduce match? (map int [\f \g]))))
+      (is (= false (reduce match? (map int [\H \I]))))))
+
+#+end_src
+
+*** React and count (1)
+This kind of task looks like perfectly suited for functional approach. At the beginning I thought I would be very easy: we need to ~reduce~ original collection of chars to filtered one, where condition is our ~match?~ func. The logic: if last unit from new collection is matching current unit taken from the original one, return new collection without the last unit (using ~butlast~ func); if not, add current unit to the new collection -- produced polymer. But behavior wasn't as I'd expect, since Clojure, as it seems, implements different behaviors to different collections. 
+
+For example, look at ~conj~ docs:
+#+name: day05_doc_conj
+#+begin_src clojure :exports results
+(doc conj)
+#+end_src
+
+#+RESULTS: day05_doc_conj
+: -------------------------
+: clojure.core/conj
+: ([coll x] [coll x & xs])
+:   conj[oin]. Returns a new collection with the xs
+:     'added'. (conj nil item) returns (item).  The 'addition' may
+:     happen at different 'places' depending on the concrete type.
+
+Let's emphasize this:
+
+#+begin_example
+The 'addition' may happen at different 'places' depending on the concrete type. 
+#+end_example
+
+Only converting collections to ~vectors~ ensured expected output, but it was slooooow. Then I found some commentary which explained that one of the reasons to implement different behavior for different collections may be ability to build FIFOs or queues and, in fact, this is what I was looking for (I thought that ~last~, ~butlast~ and ~conj~ would do the job). To implement this I had to pick differntly crafted func: ~peek~ and ~pop~. 
+
+Let's look at [[https://clojuredocs.org/clojure.core/peek][peek]] docs:
+
+#+name: day05_doc_peek
+#+begin_src clojure :exports results
+(doc peek)
+#+end_src
+
+#+RESULTS: day05_doc_peek
+: -------------------------
+: clojure.core/peek
+: ([coll])
+:   For a list or queue, same as first, for a vector, same as, but much
+:   more efficient than, last. If the collection is empty, returns nil.
+
+And [[https://clojuredocs.org/clojure.core/pop][pop]]:
+
+#+name: day05_doc_pop
+#+begin_src clojure :exports results
+(doc pop)
+#+end_src
+
+#+RESULTS: day05_doc_pop
+: -------------------------
+: clojure.core/pop
+: ([coll])
+:   For a list or queue, returns a new list/queue without the first
+:   item, for a vector, returns a new vector without the last item. If
+:   the collection is empty, throws an exception.  Note - not the same
+:   as next/butlast.
+
+I had to experiment with that a little to find out how exactly my code would behave, and than came out to this simple solution:
+
+#+name: day05_react
+#+begin_src clojure :noweb-ref code05
+(defn react [polymer]
+  (count
+   (reduce
+    (fn [coll unit]
+      (if (and (seq coll) (match? (peek coll) unit))
+        (pop coll)
+        (conj coll unit)))
+    '() polymer)))
+
+#+end_src
+
+*** Find the shortest polymer (2)
+Our task is to find reaction which produces the shortest polymer /after/ removing units of the same type (namely letters which differ only casewise). Since I've converted input string to integers now I have only to exclude pairs of integers where one is in the range from 97 to 122 and second is minus 32.  
+
+#+name: day05_remove_units
+#+begin_src clojure :noweb-ref code05 
+(defn remove-units [coll unit] (remove (hash-set unit (- unit 32)) coll))
+
+#+end_src
+
+~remove~ takes a predicate agains a collection. At first I wrote an explicit predicate which was combining arithmetical operations:
+
+#+begin_example clojure
+  #(or (= num %) (= (- num 32) %))
+#+end_example
+
+But since [[http://clojure-doc.org/articles/language/functions.html#sets-as-functions][sets may be functions]] we can use a ~hash-set~ as a predicate, as above.
+
+Testing. ~remove-units~ operate on integers but let's use string and chars for readability sake:
+ 
+#+name: day05_remove_units_test
+#+begin_src clojure :noweb-ref test05
+  (deftest remove-units-test
+    (testing "should remove ints corresponding to lower- and uppercase letters from the
+              collection"
+      (is (= [\o \l \a \n]
+             (vec (map char (remove-units (map int "Golang") (int \g))))))
+      (is (= [\C \l \o \j \u \r \e]
+             (vec (map char (remove-units (map int "Clojure") (int \x))))))))
+
+#+end_src
+
+*** Putting things together
+Solution to the second part consists of finding the shortest polymer after consecutively removing some units. I'd map ~react~ feed by polymer with removed units over range of available units (i.e. chars):
+
+#+name: day05_solution
+#+begin_src clojure :noweb-ref code05
+  (defn solve [input]
+    (let [polymer (map int input)]
+      {:part1 (time (react polymer))
+       :part2 (time (apply min
+                           (map #(react (remove-units polymer %))
+                                (range 97 123))))
+       }))
+
+#+end_src
+
+#+name: day05_remove_units_test
+#+begin_src clojure :noweb-ref test05
+  (deftest solve-test
+    (testing "should match examples"
+      (is (= {:part1 10 :part2 4} (solve "dabAcCaCBAcCcaDA")))))
+
+#+end_src
+
+#+name: day05_tangle
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle05.clj :exports none :results silent
+  <<code05>>
+#+end_src
+
+#+name: day05_test_tangle
+#+begin_src clojure :noweb yes :tangle test/aoc18/puzzle05_test.clj :exports none :results silent
+  <<test05>>
+#+end_src
+
+Run all tests:
+
+#+name: day05_tests
+#+begin_src clojure :results output :exports results
+  (require '[clojure.test :refer [run-tests]] 'aoc18.puzzle05-test)
+  (run-tests 'aoc18.puzzle05-test)
+#+end_src
+
+#+RESULTS: day05_tests
+: 
+: Testing aoc18.puzzle05-test
+: "Elapsed time: 0.191675 msecs"
+: "Elapsed time: 3.69894 msecs"
+: 
+: Ran 3 tests containing 8 assertions.
+: 0 failures, 0 errors.
+
+Get the answer:
+
+#+name: day05_results
+#+begin_src clojure :ns aoc18.puzzle05 :exports results
+  (prn (solve (first (input->str "day05"))))
+#+end_src
+
+#+RESULTS: day05_results
+: "Elapsed time: 416.582294 msecs"
+: "Elapsed time: 10419.124998 msecs"
+: {:part1 10972, :part2 5278}
+
+It takes about 10 sec to complete the second part (without using queue it was taking too long) -- I'm curious how could I optimize it to work faster?
+
+** COMMENT Commentary
+
+
