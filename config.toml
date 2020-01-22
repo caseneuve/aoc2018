@@ -1,4 +1,4 @@
-baseurl = ""
+baseurl = "aoc18/"
 languageCode = "en-us"
 theme = "minos"
 Title = "Advent of Code 2018 with Clojure"
