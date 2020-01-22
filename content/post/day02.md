@@ -17,6 +17,8 @@ As input we get list of strings made of random letters representing IDs of boxes
 
 ## Solution {#solution}
 
+[Check full solution in the repo](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle02.clj)
+
 
 ### Namespace and requirements {#namespace-and-requirements}
 
@@ -246,10 +248,10 @@ Run tests:
 ```text
 
 Testing aoc18.puzzle02-test
-"Elapsed time: 0.034116 msecs"
-"Elapsed time: 0.016846 msecs"
-"Elapsed time: 0.049534 msecs"
-"Elapsed time: 0.024806 msecs"
+"Elapsed time: 0.060013 msecs"
+"Elapsed time: 0.044181 msecs"
+"Elapsed time: 0.029698 msecs"
+"Elapsed time: 0.010819 msecs"
 
 Ran 7 tests containing 16 assertions.
 0 failures, 0 errors.
@@ -258,8 +260,8 @@ Ran 7 tests containing 16 assertions.
 Get the answer:
 
 ```text
-"Elapsed time: 8.065669 msecs"
-"Elapsed time: 0.079509 msecs"
-"Elapsed time: 0.023203 msecs"
+"Elapsed time: 7.033704 msecs"
+"Elapsed time: 0.075747 msecs"
+"Elapsed time: 0.022212 msecs"
 {:part1 5456, :part2-1 "megsdlpulxvinkatfoyzxcbvq", :part2-2 "megsdlpulxvinkatfoyzxcbvq"}
 ```

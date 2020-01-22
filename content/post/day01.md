@@ -17,6 +17,8 @@ As input we get integers representing change of "frequency". To count final freq
 
 ## Solutions {#solutions}
 
+[Full solution in a file](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle01.clj)
+
 
 ### Namespace {#namespace}
 
@@ -131,7 +133,7 @@ Ran 1 tests containing 4 assertions.
 And get the answer:
 
 ```text
-"Elapsed time: 1.311216 msecs"
-"Elapsed time: 229.341601 msecs"
+"Elapsed time: 0.506288 msecs"
+"Elapsed time: 205.237286 msecs"
 {:part1 595, :part2 80598}
 ```

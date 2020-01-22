@@ -118,6 +118,8 @@ Here are other examples:
 What is the first frequency your device reaches twice?
 
 ** Solutions
+[[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle01.clj][Check full solution in the repo]]
+
 *** Namespace
 Since I would always use some helpers to read input, I will further on export ~namespace~ definition only when other requirements are needed.
 
@@ -333,6 +335,8 @@ The IDs abcde and axcye are close, but they differ by two characters (the second
 What letters are common between the two correct box IDs? (In the example above, this is found by removing the differing character from either ID, producing fgij.)
 
 ** Solution
+[[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle02.clj][Check full solution in the repo]]
+
 *** Namespace and requirements
 This time I'll explore some ~set~ and ~string~ funcs. (I add ~:rename~ keyword because Clojure complains about renaming ~replace~ from ~clojure.core~ by the func of same name from ~clojure.string.~)
 
@@ -695,6 +699,8 @@ For example, in the claims above, only claim 3 is intact after all claims are ma
 What is the ID of the only claim that doesn't overlap?
 
 ** Solution
+[[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle03.clj][Check full solution in the repo]]
+
 *** Namespace and requirements
 Besides of usual input parsing I will use ~difference~ and ~union~ from ~clojure.set~.
 
@@ -1050,6 +1056,8 @@ In the example above, Guard #99 spent minute 45 asleep more than any other guard
 What is the ID of the guard you chose multiplied by the minute you chose? (In the above example, the answer would be 99 * 45 = 4455.)
 
 ** Solution
+[[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle04.clj][Check full solution in the repo]]
+ 
 *** Namespace :noexport:
 #+name: day04_ns
 #+begin_src clojure :noweb-ref code04 :results silent :exports none
@@ -1372,6 +1380,8 @@ In this example, removing all C/c units was best, producing the answer 4.
 What is the length of the shortest polymer you can produce by removing all units of exactly one type and fully reacting the result?
 
 ** Solution
+[[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle05.clj][Check full solution in the repo]]
+
 *** Namespace :noexport:
 #+name: day05_ns
 #+begin_src clojure :noweb-ref code05 :results silent :exports none
@@ -1584,11 +1594,11 @@ Run all tests:
 Get the answer:
 
 #+name: day05_results
-#+begin_src clojure :ns aoc18.puzzle05 :exports results
+#+begin_src clojure :ns aoc18.puzzle05 :exports none
   (prn (solve (first (input->str "day05"))))
 #+end_src
 
-#+RESULTS: day05_results
+#+RESULTS:
 : "Elapsed time: 416.582294 msecs"
 : "Elapsed time: 10419.124998 msecs"
 : {:part1 10972, :part2 5278}

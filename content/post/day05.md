@@ -19,6 +19,8 @@ For example string `dabAcCaCBAcCcaDA` produces 10-char long polymer `dabCBAcaDA`
 
 ## Solution {#solution}
 
+[Check full solution in the repo](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle05.clj)
+
 
 ### Helper: find matching letters {#helper-find-matching-letters}
 
@@ -181,8 +183,8 @@ Run all tests:
 ```text
 
 Testing aoc18.puzzle05-test
-"Elapsed time: 0.302103 msecs"
-"Elapsed time: 8.798286 msecs"
+"Elapsed time: 0.623315 msecs"
+"Elapsed time: 6.736692 msecs"
 
 Ran 3 tests containing 8 assertions.
 0 failures, 0 errors.

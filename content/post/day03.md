@@ -19,6 +19,8 @@ Our task is to find number of points on the grid covered potentially by the clai
 
 ## Solution {#solution}
 
+[Check full solution in the repo](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle03.clj)
+
 
 ### Namespace and requirements {#namespace-and-requirements}
 
@@ -252,9 +254,9 @@ Run tests:
 ```text
 
 Testing aoc18.puzzle03-test
-"Elapsed time: 0.6884 msecs"
-"Elapsed time: 0.040806 msecs"
-"Elapsed time: 0.082 msecs"
+"Elapsed time: 0.143403 msecs"
+"Elapsed time: 0.044249 msecs"
+"Elapsed time: 0.183151 msecs"
 
 Ran 6 tests containing 7 assertions.
 0 failures, 0 errors.
@@ -263,8 +265,8 @@ Ran 6 tests containing 7 assertions.
 Get the answer:
 
 ```text
-"Elapsed time: 2347.997127 msecs"
-"Elapsed time: 219.160746 msecs"
-"Elapsed time: 308.808778 msecs"
+"Elapsed time: 1164.283612 msecs"
+"Elapsed time: 317.435826 msecs"
+"Elapsed time: 320.920726 msecs"
 {:part1 98005, :part2 331}
 ```

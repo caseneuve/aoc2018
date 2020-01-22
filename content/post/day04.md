@@ -19,6 +19,8 @@ For part 2 we need to find the guard which has the highest occurence of one minu
 
 ## Solution {#solution}
 
+[Check full solution in the repo](https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle04.clj)
+
 
 ### Parsing the logs {#parsing-the-logs}
 
@@ -237,8 +239,8 @@ Run all tests:
 ```text
 
 Testing aoc18.puzzle04-test
-"Elapsed time: 0.011345 msecs"
-"Elapsed time: 0.010822 msecs"
+"Elapsed time: 0.018437 msecs"
+"Elapsed time: 0.014279 msecs"
 
 Ran 7 tests containing 8 assertions.
 0 failures, 0 errors.
@@ -247,7 +249,7 @@ Ran 7 tests containing 8 assertions.
 Get the answer:
 
 ```text
-"Elapsed time: 0.025919 msecs"
-"Elapsed time: 0.014803 msecs"
+"Elapsed time: 0.021786 msecs"
+"Elapsed time: 0.019402 msecs"
 {:part1 3212, :part2 4966}
 ```
