@@ -254,9 +254,9 @@ Run tests:
 ```text
 
 Testing aoc18.puzzle03-test
-"Elapsed time: 0.143403 msecs"
-"Elapsed time: 0.044249 msecs"
-"Elapsed time: 0.183151 msecs"
+"Elapsed time: 0.148454 msecs"
+"Elapsed time: 0.029607 msecs"
+"Elapsed time: 0.058851 msecs"
 
 Ran 6 tests containing 7 assertions.
 0 failures, 0 errors.
@@ -264,9 +264,9 @@ Ran 6 tests containing 7 assertions.
 
 Get the answer:
 
-```text
-"Elapsed time: 1164.283612 msecs"
-"Elapsed time: 317.435826 msecs"
-"Elapsed time: 320.920726 msecs"
+```clojure
+"Elapsed time: 1107.443168 msecs"
+"Elapsed time: 807.155267 msecs"
+"Elapsed time: 301.534267 msecs"
 {:part1 98005, :part2 331}
 ```

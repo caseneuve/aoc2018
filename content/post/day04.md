@@ -239,8 +239,8 @@ Run all tests:
 ```text
 
 Testing aoc18.puzzle04-test
-"Elapsed time: 0.018437 msecs"
-"Elapsed time: 0.014279 msecs"
+"Elapsed time: 0.01095 msecs"
+"Elapsed time: 0.011563 msecs"
 
 Ran 7 tests containing 8 assertions.
 0 failures, 0 errors.
@@ -248,8 +248,8 @@ Ran 7 tests containing 8 assertions.
 
 Get the answer:
 
-```text
-"Elapsed time: 0.021786 msecs"
-"Elapsed time: 0.019402 msecs"
-{:part1 3212, :part2 4966}
+```clojure
+"Elapsed time: 0.138526 msecs"
+"Elapsed time: 1.7591 msecs"
+{:part1 5, :part2 4}
 ```

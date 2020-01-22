@@ -132,8 +132,8 @@ Ran 1 tests containing 4 assertions.
 
 And get the answer:
 
-```text
-"Elapsed time: 0.506288 msecs"
-"Elapsed time: 205.237286 msecs"
+```clojure
+"Elapsed time: 0.200073 msecs"
+"Elapsed time: 208.964315 msecs"
 {:part1 595, :part2 80598}
 ```

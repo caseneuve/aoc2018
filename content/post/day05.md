@@ -28,13 +28,10 @@ Since reaction consists of "consuming" units of the same type but opposite polar
 
 <a id="code-snippet--day04-chars-to-ints"></a>
 ```clojure
-(prn (map char (range 97 123)))
-(prn (map char (map #(- % 32) (range 97 123))))
-```
-
-```text
-(\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z)
-(\A \B \C \D \E \F \G \H \I \J \K \L \M \N \O \P \Q \R \S \T \U \V \W \X \Y \Z)
+(map char (range 97 123))
+;; => (\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z)
+(map char (map #(- % 32) (range 97 123)))
+;; => (\A \B \C \D \E \F \G \H \I \J \K \L \M \N \O \P \Q \R \S \T \U \V \W \X \Y \Z)
 ```
 
 This should return `nil` or throw an exception:
@@ -183,8 +180,8 @@ Run all tests:
 ```text
 
 Testing aoc18.puzzle05-test
-"Elapsed time: 0.623315 msecs"
-"Elapsed time: 6.736692 msecs"
+"Elapsed time: 0.192413 msecs"
+"Elapsed time: 5.112943 msecs"
 
 Ran 3 tests containing 8 assertions.
 0 failures, 0 errors.
@@ -192,7 +189,7 @@ Ran 3 tests containing 8 assertions.
 
 Get the answer:
 
-```text
+```clojure
 "Elapsed time: 416.582294 msecs"
 "Elapsed time: 10419.124998 msecs"
 {:part1 10972, :part2 5278}

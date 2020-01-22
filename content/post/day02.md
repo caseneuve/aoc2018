@@ -248,10 +248,10 @@ Run tests:
 ```text
 
 Testing aoc18.puzzle02-test
-"Elapsed time: 0.060013 msecs"
-"Elapsed time: 0.044181 msecs"
-"Elapsed time: 0.029698 msecs"
-"Elapsed time: 0.010819 msecs"
+"Elapsed time: 0.047843 msecs"
+"Elapsed time: 0.024114 msecs"
+"Elapsed time: 0.045915 msecs"
+"Elapsed time: 0.023275 msecs"
 
 Ran 7 tests containing 16 assertions.
 0 failures, 0 errors.
@@ -259,9 +259,11 @@ Ran 7 tests containing 16 assertions.
 
 Get the answer:
 
-```text
-"Elapsed time: 7.033704 msecs"
-"Elapsed time: 0.075747 msecs"
-"Elapsed time: 0.022212 msecs"
-{:part1 5456, :part2-1 "megsdlpulxvinkatfoyzxcbvq", :part2-2 "megsdlpulxvinkatfoyzxcbvq"}
+```clojure
+"Elapsed time: 7.029563 msecs"
+"Elapsed time: 0.07834 msecs"
+"Elapsed time: 0.02162 msecs"
+{:part1 5456,
+ :part2-1 "megsdlpulxvinkatfoyzxcbvq",
+ :part2-2 "megsdlpulxvinkatfoyzxcbvq"}
 ```

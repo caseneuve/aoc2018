@@ -253,14 +253,16 @@ Finally let's run tests:
 And get the answer:
 
 #+name: day01_results
-#+begin_src clojure :ns aoc18.puzzle01 :exports results
-  (prn (solve))
+#+begin_src clojure :ns aoc18.puzzle01 :exports results :results code
+  (solve)
 #+end_src
 
 #+RESULTS: day01_results
-: "Elapsed time: 1.956702 msecs"
-: "Elapsed time: 250.630055 msecs"
-: {:part1 595, :part2 80598}
+#+begin_src clojure
+"Elapsed time: 0.283155 msecs"
+"Elapsed time: 209.2901 msecs"
+{:part1 595, :part2 80598}
+#+end_src
 
 ** COMMENT Commentary
 Discussion about apply and reduce
@@ -605,15 +607,19 @@ Get the answer:
 #+RESULTS: day02_tangle
 
 #+name: day02_results
-#+begin_src clojure :exports results :ns aoc18.puzzle02
-  (prn (solve))
+#+begin_src clojure :exports results :ns aoc18.puzzle02 :results code
+  (solve)
 #+end_src
 
 #+RESULTS: day02_results
-: "Elapsed time: 7.848962 msecs"
-: "Elapsed time: 0.106668 msecs"
-: "Elapsed time: 0.035794 msecs"
-: {:part1 5456, :part2-1 "megsdlpulxvinkatfoyzxcbvq", :part2-2 "megsdlpulxvinkatfoyzxcbvq"}
+#+begin_src clojure
+"Elapsed time: 30.376229 msecs"
+"Elapsed time: 0.323308 msecs"
+"Elapsed time: 0.429427 msecs"
+{:part1 5456,
+ :part2-1 "megsdlpulxvinkatfoyzxcbvq",
+ :part2-2 "megsdlpulxvinkatfoyzxcbvq"}
+#+end_src
 
 ** COMMENT Commentary
 New stuff [0/6] 
@@ -964,15 +970,17 @@ Run tests:
 Get the answer:
 
 #+name: day03_result
-#+begin_src clojure :ns aoc18.puzzle03 :exports results
-  (prn (solve "day03"))
+#+begin_src clojure :ns aoc18.puzzle03 :exports results :results code
+  (solve "day03")
 #+end_src
 
 #+RESULTS: day03_result
-: "Elapsed time: 1948.021728 msecs"
-: "Elapsed time: 260.814256 msecs"
-: "Elapsed time: 344.227857 msecs"
-: {:part1 98005, :part2 331}
+#+begin_src clojure
+"Elapsed time: 1389.891323 msecs"
+"Elapsed time: 294.721887 msecs"
+"Elapsed time: 300.97284 msecs"
+{:part1 98005, :part2 331}
+#+end_src
 
 ** COMMENT Commentary
 - [ ] re-seq
@@ -1308,21 +1316,23 @@ Run all tests:
 : 0 failures, 0 errors.
 
 #+name: day04_tangle
-#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle04.clj :exports none
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle04.clj :exports none :results silent
   <<code04>>
 #+end_src
 
 Get the answer:
 
-#+name: day04_results>
-#+begin_src clojure :ns aoc18.puzzle04 :exports results
-(prn (solve "day04"))
+#+name: day04_results
+#+begin_src clojure :ns aoc18.puzzle04 :exports results :results code
+  (solve "day04")
 #+end_src
 
-#+RESULTS: day04_results>
-: "Elapsed time: 0.024787 msecs"
-: "Elapsed time: 0.022204 msecs"
-: {:part1 3212, :part2 4966}
+#+RESULTS: day04_results
+#+begin_src clojure
+"Elapsed time: 0.208676 msecs"
+"Elapsed time: 0.011375 msecs"
+{:part1 3212, :part2 4966}
+#+end_src
 
 
 ** COMMENT Commentary
@@ -1402,20 +1412,19 @@ What is the length of the shortest polymer you can produce by removing all units
 Since reaction consists of "consuming" units of the same type but opposite polarity which means the same letters of opposite case we could use ~Character/isUpperCase~ to build a simple function ~upper?~ and look for two chars which reduced to the same case (by ~clojure.string/lower-case~ for example) are equal but differ cases. But this is somewhat tedious. Much simpler solution will be to convert chars to integers because this reduces whole logic to one calculation: checking if absolute difference between two ints is 32 (this being the difference between lowercase and uppercase letters represented by ints). 
 
 #+name: day04_chars_to_ints
-#+begin_src clojure :exports both :results output
-  (prn (map char (range 97 123)))
-  (prn (map char (map #(- % 32) (range 97 123))))
+#+begin_src clojure :exports code :results output :results value
+  (map char (range 97 123))
+  ;; => (\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z)
+  (map char (map #(- % 32) (range 97 123)))
+  ;; => (\A \B \C \D \E \F \G \H \I \J \K \L \M \N \O \P \Q \R \S \T \U \V \W \X \Y \Z)
 #+end_src
-
-#+RESULTS: day04_chars_to_ints
-: (\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z)
-: (\A \B \C \D \E \F \G \H \I \J \K \L \M \N \O \P \Q \R \S \T \U \V \W \X \Y \Z)
 
 This should return ~nil~ or throw an exception:
 
 #+name: day05_assert
 #+begin_src clojure :exports code :results code 
   (assert (= (- (int \a) (int \A)) 32))   ;; => nil
+
 #+end_src
 
 Good. So our helper func would look like this:
@@ -1594,14 +1603,16 @@ Run all tests:
 Get the answer:
 
 #+name: day05_results
-#+begin_src clojure :ns aoc18.puzzle05 :exports none
-  (prn (solve (first (input->str "day05"))))
+#+begin_src clojure :ns aoc18.puzzle05 :exports none :results code
+  (solve (first (input->str "day05")))
 #+end_src
 
-#+RESULTS:
-: "Elapsed time: 416.582294 msecs"
-: "Elapsed time: 10419.124998 msecs"
-: {:part1 10972, :part2 5278}
+#+RESULTS: 
+#+begin_src clojure 
+  "Elapsed time: 416.582294 msecs"
+  "Elapsed time: 10419.124998 msecs"
+  {:part1 10972, :part2 5278}
+#+end_src
 
 It takes about 10 sec to complete the second part (without using queue it was taking too long) -- I'm curious how could I optimize it to work faster?
 
