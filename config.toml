@@ -1,0 +1,39 @@
+baseurl = ""
+languageCode = "en-us"
+theme = "minos"
+Title = "Advent of Code 2018 with Clojure"
+
+[params]
+  smartToc = true
+  customCss = ["css/toc.css"]
+
+[markup]
+  [markup.tableOfContents]
+    endLevel = 4
+    ordered = true
+    startLevel = 2
+
+[Author]
+  name = "Piotr Kaznowski"
+
+[menu]
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about"
+    weight = -110
+  [[menu.main]]
+    identifier = "disclaimer"
+    name = "Disclaimer"
+    url = "/disclaimer"
+    weight = -100
+  [[menu.main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/post"
+    weight = -90
+[[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags"
+    weight = -80
