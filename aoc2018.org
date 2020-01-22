@@ -8,11 +8,11 @@
 #+author: Piotr Kaznowski
 #+date:   2020-01-03
 
-* edit About
+* edit Idea
 CLOSED: [2020-01-10 Fri 10:49]
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: /
-:EXPORT_FILE_NAME: about
+:EXPORT_FILE_NAME: idea
 :EXPORT_HUGO_CUSTOM_FRONT_MATTER: :hidden true
 :END:
 ** Idea

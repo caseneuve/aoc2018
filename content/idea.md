@@ -1,5 +1,5 @@
 +++
-title = "About"
+title = "Idea"
 author = ["Piotr Kaznowski"]
 date = 2020-01-10T10:49:00+01:00
 draft = false

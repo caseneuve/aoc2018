@@ -19,8 +19,8 @@ Title = "Advent of Code 2018 with Clojure"
 [menu]
   [[menu.main]]
     identifier = "about"
-    name = "About"
-    url = "/about"
+    name = "Idea"
+    url = "/idea"
     weight = -110
   [[menu.main]]
     identifier = "disclaimer"
@@ -32,8 +32,13 @@ Title = "Advent of Code 2018 with Clojure"
     name = "Posts"
     url = "/post"
     weight = -90
-[[menu.main]]
+  [[menu.main]]
     identifier = "tags"
     name = "Tags"
     url = "/tags"
     weight = -80
+  [[menu.main]]
+    identifier = "main"
+    name = "About"
+    url = "https://pkaznowski.gitlab.io"
+    weight = -70
