@@ -5,7 +5,7 @@ Title = "Advent of Code 2018 with Clojure"
 
 [params]
   smartToc = true
-  customCss = ["css/toc.css"]
+  customCss = ["css/code.css", "css/toc.css"]
 
 [markup]
   [markup.tableOfContents]
