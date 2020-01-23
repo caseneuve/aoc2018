@@ -991,7 +991,7 @@ CLOSED: [2020-01-18 Sat 18:22]
 :PROPERTIES:
 :EXPORT_FILE_NAME: day04
 :EXPORT_HUGO_WEIGHT: 104
-:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Parsing with regexes, loops with hash-maps. Fully TDDed!"
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Parsing with regexes, loops with hash-maps; TDDed"
 :END:
 ** Puzzle summary
 https://adventofcode.com/2018/day/4

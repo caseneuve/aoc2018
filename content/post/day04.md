@@ -5,7 +5,7 @@ date = 2020-01-18T18:22:00+01:00
 tags = ["some", "val", "key"]
 draft = false
 weight = 104
-summary = "Parsing with regexes, loops with hash-maps. Fully TDDed!"
+summary = "Parsing with regexes, loops with hash-maps; TDDed"
 +++
 
 ## Puzzle summary {#puzzle-summary}
