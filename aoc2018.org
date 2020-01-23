@@ -22,14 +22,16 @@ https://adventofcode.com/
 - [[https://github.com/pgorczak/adventofcode-clj/][Philipp Gorczak's AoC 2018 solutions]] 
 - [[https://github.com/borkdude/advent-of-cljc/tree/master/src/aoc/y2018][Borkdude's AoC 2018 solutions]] 
 
-* edit Disclaimer
+* finished Disclaimer
 CLOSED: [2020-01-11 Sat 10:49]
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: /
 :EXPORT_FILE_NAME: disclaimer
-:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :hidden true
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :hidden true :notoc true
 :END:
-Disclaimer
+This blog is my personal "journal" where I keep notes about solving [[https://adventofcode.com/][Advent of Code]] puzzles and learning [[https://clojure.org/][Clojure]]. It by no means pretend to be a tutorial for anyone. While I try to find idiomatic solutions which respect the language design I don't claim solutions provided here are canonical (BTW if you find misunderstandings, syntax abuse or other errors, please let me know!). 
+
+This being said I hope my notes might be useful for those who share my [[https://pkaznowski.gitlab.io/aoc18/idea][idea]] of learning a new lang.   
 
 * todo Setup                  :arrow_threads:require:ns:
 :PROPERTIES:
