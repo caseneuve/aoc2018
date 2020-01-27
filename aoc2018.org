@@ -1638,5 +1638,90 @@ Get the answer:
 It takes about 10 sec to complete the second part (without using queue it was taking too long) -- I'm curious how could I optimize it to work faster?
 
 ** COMMENT Commentary
+* todo Day 07: The Sum of Its Parts
+** Descriptions :noexport:
+*** Part 1
+You find yourself standing on a snow-covered coastline; apparently, you landed a little off course. The region is too hilly to see the North Pole from here, but you do spot some Elves that seem to be trying to unpack something that washed ashore. It's quite cold out, so you decide to risk creating a paradox by asking them for directions.
 
+"Oh, are you the search party?" Somehow, you can understand whatever Elves from the year 1018 speak; you assume it's Ancient Nordic Elvish. Could the device on your wrist also be a translator? "Those clothes don't look very warm; take this." They hand you a heavy coat.
 
+"We do need to find our way back to the North Pole, but we have higher priorities at the moment. You see, believe it or not, this box contains something that will solve all of Santa's transportation problems - at least, that's what it looks like from the pictures in the instructions." It doesn't seem like they can read whatever language it's in, but you can: "Sleigh kit. Some assembly required."
+
+"'Sleigh'? What a wonderful name! You must help us assemble this 'sleigh' at once!" They start excitedly pulling more parts out of the box.
+
+The instructions specify a series of steps and requirements about which steps must be finished before others can begin (your puzzle input). Each step is designated by a single letter. For example, suppose you have the following instructions:
+
+#+begin_src txt :tangle inputs/day07-ex
+Step C must be finished before step A can begin.
+Step C must be finished before step F can begin.
+Step A must be finished before step B can begin.
+Step A must be finished before step D can begin.
+Step B must be finished before step E can begin.
+Step D must be finished before step E can begin.
+Step F must be finished before step E can begin.
+#+end_src
+
+Visually, these requirements look like this:
+
+#+begin_example
+  -->A--->B--
+ /    \      \
+C      -->D----->E
+ \           /
+  ---->F-----
+#+end_example
+
+Your first goal is to determine the order in which the steps should be completed. If more than one step is ready, choose the step which is first alphabetically. In this example, the steps would be completed as follows:
+
+Only C is available, and so it is done first.
+Next, both A and F are available. A is first alphabetically, so it is done next.
+Then, even though F was available earlier, steps B and D are now also available, and B is the first alphabetically of the three.
+After that, only D and F are available. E is not available because only some of its prerequisites are complete. Therefore, D is completed next.
+F is the only choice, so it is done next.
+Finally, E is completed.
+So, in this example, the correct order is CABDFE.
+
+In what order should the steps in your instructions be completed?
+
+** Solution
+
+#+name: day07
+#+begin_src clojure :tangle src/aoc18/puzzle07.clj
+  (ns aoc18.puzzle07 (:require [aoc18.utils :refer [input->str]]
+                               [clojure.repl :refer [doc]]))
+
+  (defn update-step [old new] (if old (conj old new) #{new}))
+
+  (defn parse [input]
+    (reduce (fn [[before after] [prec succ]] [(update before prec update-step succ)
+                                             (update after succ update-step prec)])
+            [{} {}] input))
+
+  (defn diff [a b]
+    (->> [a b]
+         (map set)
+         (reduce clojure.set/difference)
+         sort))
+
+  (defn match [steps candidates after]
+    (filter
+     #(when (empty? (clojure.set/difference (after %) (set steps))) %)
+     candidates))
+
+  (defn walk [before after]
+    (let [[ka kb] (map keys [after before])]
+      (loop [steps [(first (diff kb ka))]]  ;; diff -> first step
+        (if (= (count steps) (count kb))
+          (conj steps (first (diff ka kb))) ;; reversed diff -> last step
+          (let [candidates (match steps (diff kb steps) after)
+                succ (first (sort (match steps candidates after)))]
+            (recur (conj steps succ)))))))
+
+  (defn solve [file]
+    (let [[before after] (->> (input->str file)
+                              (map #(re-seq #" [A-Z] " %))
+                              (map #(map clojure.string/trim %))
+                              parse)]
+      {:part (time (reduce str (walk before after)))
+       :part2 (time "")}))
+#+end_src
