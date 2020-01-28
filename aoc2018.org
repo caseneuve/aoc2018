@@ -1087,7 +1087,7 @@ What is the ID of the guard you chose multiplied by the minute you chose? (In th
 ** Solution
 [[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle04.clj][Check full solution in the repo]]
  
-*** Namespace :noexport:
+*** Namespace                 :noexport:
 #+name: day04_ns
 #+begin_src clojure :noweb-ref code04 :results silent :exports none
   (ns aoc18.puzzle04 [:require [aoc18.utils :refer [input->str]]])
@@ -1362,7 +1362,7 @@ CLOSED: [2020-01-22 Wed 11:31]
 :PROPERTIES:
 :EXPORT_FILE_NAME: day05
 :EXPORT_HUGO_WEIGHT: 105
- :EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Peek and pop: building a simple queue"
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Peek and pop: building a simple queue"
 :END:
 ** Puzzle summary
 https://adventofcode.com/2018/day/5
@@ -1371,7 +1371,7 @@ As input we get string of 50.000 chars which is referred to as a "polymer". Poly
 
 For example string ~dabAcCaCBAcCcaDA~ produces 10-char long polymer ~dabCBAcaDA~.
 
-** Descriptions :noexport:
+** Descriptions               :noexport:
 *** Part 1
 You've managed to sneak in to the prototype suit manufacturing lab. The Elves are making decent progress, but are still struggling with the suit's size reduction capabilities.
 
@@ -1413,7 +1413,7 @@ What is the length of the shortest polymer you can produce by removing all units
 ** Solution
 [[https://gitlab.com/pkaznowski/aoc18/blob/master/src/aoc18/puzzle05.clj][Check full solution in the repo]]
 
-*** Namespace :noexport:
+*** Namespace                 :noexport:
 #+name: day05_ns
 #+begin_src clojure :noweb-ref code05 :results silent :exports none
   (ns aoc18.puzzle05 (:require [aoc18.utils :refer [input->str]]
@@ -1638,5 +1638,354 @@ Get the answer:
 It takes about 10 sec to complete the second part (without using queue it was taking too long) -- I'm curious how could I optimize it to work faster?
 
 ** COMMENT Commentary
+* todo Day 06: Day 6: Chronal Coordinates
+:PROPERTIES:
+:EXPORT_FILE_NAME: day06
+:EXPORT_HUGO_WEIGHT: 106
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary "Optimizing with pmap; groupping with min-key, dissociating hash-maps and more!"
+:END:
+** Puzzle summary
+https://adventofcode.com/2018/day/6
 
+This time we get set of x, y coordinates as input. We have to put those coordinates into an infinite grid. Each coordinate has its area which is computed using Manhattan distance: every point closest to given coordinate is included to the area. When a point has equal distances to two (or more) coordinates it's not counted. If area of a coordinate is not limited by points adhering to anther area it's considered infinite.
+Our task is to find largest non-infinite area on the grid.
+
+*After-thoughts*
+Ok, this one was not very pleasant. 
+
+1. Clojure makes needed computations rather slowly (after optimizations it still tooks around 40 sec. for each part), I don't know how to make it faster.
+2. I misinterpreted first part's instruction assuming that only coordinates on grid's border should be excluded from consideration as those of infinite area (since the grid is infinite), it appears we have to exclude coordinates closest to the grid's border. 
+
+Anyway I had to look for some hints, and it was worth it since I discovered new stuff: ~min-key~, ~pmap~, ~dissoc~, etc.
+
+** Descriptions               :noexport:
+*** Part 1
+The device on your wrist beeps several times, and once again you feel like you're falling.
+
+"Situation critical," the device announces. "Destination indeterminate. Chronal interference detected. Please specify new target coordinates."
+
+The device then produces a list of coordinates (your puzzle input). Are they places it thinks are safe or dangerous? It recommends you check manual page 729. The Elves did not give you a manual.
+
+If they're dangerous, maybe you can minimize the danger by finding the coordinate that gives the largest distance from the other points.
+
+Using only the Manhattan distance, determine the area around each coordinate by counting the number of integer X,Y locations that are closest to that coordinate (and aren't tied in distance to any other coordinate).
+
+Your goal is to find the size of the largest area that isn't infinite. For example, consider the following list of coordinates:
+
+#+begin_src txt :tangle inputs/day06-ex
+1, 1
+1, 6
+8, 3
+3, 4
+5, 5
+8, 9
+#+end_src
+
+If we name these coordinates A through F, we can draw them on a grid, putting 0,0 at the top left:
+
+#+begin_example
+..........
+.A........
+..........
+........C.
+...D......
+.....E....
+.B........
+..........
+..........
+........F.
+#+end_example
+
+This view is partial - the actual grid extends infinitely in all directions. Using the Manhattan distance, each location's closest coordinate can be determined, shown here in lowercase:
+
+#+begin_example
+aaaaa.cccc
+aAaaa.cccc
+aaaddecccc
+aadddeccCc
+..dDdeeccc
+bb.deEeecc
+bBb.eeee..
+bbb.eeefff
+bbb.eeffff
+bbb.ffffFf
+#+end_example
+
+Locations shown as . are equally far from two or more coordinates, and so they don't count as being closest to any.
+
+In this example, the areas of coordinates A, B, C, and F are infinite - while not shown here, their areas extend forever outside the visible grid. However, the areas of coordinates D and E are finite: D is closest to 9 locations, and E is closest to 17 (both including the coordinate's location itself). Therefore, in this example, the size of the largest area is 17.
+
+What is the size of the largest area that isn't infinite?
+*** Part 2
+On the other hand, if the coordinates are safe, maybe the best you can do is try to find a region near as many coordinates as possible.
+
+For example, suppose you want the sum of the Manhattan distance to all of the coordinates to be less than 32. For each location, add up the distances to all of the given coordinates; if the total of those distances is less than 32, that location is within the desired region. Using the same coordinates as above, the resulting region looks like this:
+
+#+begin_example
+..........
+.A........
+..........
+...#*#..C.
+..#D###...
+..###E#...
+.B.###....
+..........
+..........
+........F.
+#+end_example
+
+In particular, consider the highlighted (*) location 4,3 located at the top middle of the region. Its calculation is as follows, where abs() is the absolute value function:
+
+#+begin_example
+Distance to coordinate A: abs(4-1) + abs(3-1) =  5
+Distance to coordinate B: abs(4-1) + abs(3-6) =  6
+Distance to coordinate C: abs(4-8) + abs(3-3) =  4
+Distance to coordinate D: abs(4-3) + abs(3-4) =  2
+Distance to coordinate E: abs(4-5) + abs(3-5) =  3
+Distance to coordinate F: abs(4-8) + abs(3-9) = 10
+#+end_example
+
+Total distance: 5 + 6 + 4 + 2 + 3 + 10 = 30
+
+Because the total distance to all coordinates (30) is less than 32, the location is within the region.
+
+This region, which also includes coordinates D and E, has a total size of 16.
+
+Your actual region will need to be much larger than this example, though, instead including all locations with a total distance of less than 10000.
+
+What is the size of the region containing all locations which have a total distance to all given coordinates of less than 10000?
+
+** Solution
+#+name: day06_ns
+#+begin_src clojure :noweb-ref code06 :exports none :results silent
+  (ns aoc18.puzzle06 (:require [clojure.repl :refer [doc]]
+                               [aoc18.utils :refer [input->xy]]))
+
+#+end_src
+
+#+name: day06_test_ns
+#+begin_src clojure :noweb-ref test06 :exports none :results silent
+  (ns aoc18.puzzle06-test (:require [aoc18.puzzle06 :refer :all]
+                                    [clojure.test :refer :all]))
+
+#+end_src
+
+*** Manhattan distance
+The [[https://en.wikipedia.org/wiki/Taxicab_geometry#Formal_definition][formula]] for...
+
+#+begin_example
+...the taxicab distance between (p1,p2) and (q1,q2) is |p1-q1|+|p2-q2|
+#+end_example
+
+We need to get the sum of absolute values of differences between xs and ys:
+
+#+name: day06_manhattan_test
+#+begin_src clojure :noweb-ref test06
+  (deftest manhattan-test
+    (testing "should return sum of absolute values of diffs of xs and ys"
+      (is (= 2 (manhattan [1 0] [0 1])))))
+
+#+end_src
+
+That's straight forward:
+
+#+name: day06_manhattan
+#+begin_src clojure :noweb-ref code06 :exports code :results silent
+  (defn manhattan [[x y] [x* y*]]
+    (+ (java.lang.Math/abs (- x x*)) (java.lang.Math/abs (- y y*))))
+
+#+end_src
+
+*** Find closest point
+Given set of coordinates we may find closest coordinate to any given point. Using given example:
+
+#+name: day06_example_grid
+#+begin_example
+aaaaa.cccc
+aAaaa.cccc
+aaaddecccc
+aadddeccCc
+..dDdeeccc
+bb.deEeecc
+bBb.eeee..
+bbb.eeefff
+bbb.eeffff
+bbb.ffffFf
+#+end_example
+
+our func should return ~A~ (1, 1) for point ~4, 0~; ~nil~ for point ~5, 0~ since it's equally distant from points ~A~ and ~C~; ~D~ (3, 4) for point ~4, 2~ and ~E~ (5, 5) for point ~5, 2~:
+
+#+begin_src clojure :noweb-ref test06 :results silent :exports code
+  (deftest closest-test
+    (testing "should match exemplary data"
+      (let [coords (input->xy "day06-ex")]
+        (is (= [1 1] (closest coords [5 0])))
+        (is (= nil   (closest coords [6 0])))
+        (is (= [3 4] (closest coords [4 2])))
+        (is (= [5 5] (closest coords [5 2]))))))
+
+#+end_src
+
+OK, first we need to create a ~hash-map~ associating distances with coordinates. To accomplish that I'll use ~group-by~:
+
+#+name: day06_group_by_doc
+#+begin_src clojure :ns aoc18.puzzle06 :exports results
+(doc group-by)
+#+end_src
+
+#+RESULTS: day06_group_by_doc
+: -------------------------
+: clojure.core/group-by
+: ([f coll])
+:   Returns a map of the elements of coll keyed by the result of
+:   f on each element. The value at each key will be a vector of the
+:   corresponding elements, in the order they appeared in coll.
+
+So, given point ~4, 0~ from the [[day06_example_grid][example]] we will get a hash-map where distances are ~keys~ (results of ~mahnattan~ func fed by the point and coordinate), and ~values~ are coordinates compared to the point:
+
+#+name: day06_group_by_example
+#+begin_src clojure :ns aoc18.puzzle06 :exports both :results code :noweb-ref example
+(group-by #(manhattan [4 0]  %) (input->xy "day06-ex"))
+#+end_src
+
+#+RESULTS: day06_group_by_example
+#+begin_src clojure
+{4 [(1 1)], 9 [(1 6)], 7 [(8 3)], 5 [(3 4)], 6 [(5 5)], 13 [(8 9)]}
+#+end_src
+
+We are interested in the closest coordinate, so we need to filter the ~hash-map~ by keys but return the value corresponding to the minimal key. The tool for this is ~min-key~:
+
+#+name: day06_min_key_docs
+#+begin_src clojure :ns aoc18.puzzle06 :exports results
+(doc min-key)
+#+end_src
+
+#+RESULTS: day06_min_key_docs
+: -------------------------
+: clojure.core/min-key
+: ([k x] [k x y] [k x y & more])
+:   Returns the x for which (k x), a number, is least.
+: 
+:   If there are multiple such xs, the last one is returned.
+
+~k~ from the documentation denotes a func (?) which will be fed by other arguemnts of ~min-key~, for example:
+
+#+name: day06_min_key_example
+#+begin_src clojure :exports code :results silent
+  (min-key first [9 1] [2 7])             ;;=> [2 7] 
+  (min-key #(first (keys %)) {9 1} {2 7}) ;;=> {2 7}
+#+end_src
+
+Since output of our [[day06_group_by_example][example]] is a ~hash-map~ we need to ~apply~ ~min-key~ to the whole using ~key~ a filtering func (it wasn't obvious for me at first):
+
+#+name: day06_min_key_over_example1
+#+begin_src clojure :exports code :results silent
+  (apply min-key key {4 ['(1 1)], 9 ['(1 6)], 7 ['(8 3)],
+                      5 ['(3 4)], 6 ['(5 5)], 13 ['(8 9)]}) ;;=> [4 [(1 1)]]
+#+end_src
+
+The same we'd do with a vector of vectors, etc.:
+#+name: day06_min_key_over_example2
+#+begin_src clojure :exports code :results silent
+  (apply min-key first [[9 2] [1 7]])     ;;=> [1 7]
+#+end_src
+
+Alright we have to add only one condition: we are interested only in points which have /one/ closest coordinate. Our func may then look like this:
+
+#+name: day06_closest
+#+begin_src clojure :noweb-ref code06 :exports code
+(defn closest [coords pos]
+  (let [cand (val (apply min-key key (group-by #(manhattan pos %) coords)))]
+    (when (= 1 (count cand)) (first cand))))
+
+#+end_src 
+
+*** Making a grid
+To get all relevant points of the grid we need to find minimal and maximal ~x, y~ coordinates, like this (assuming that `coords` are from the [[day06_example_grid][example]]):
+
+#+name: day06_getting_mins_and_maxs
+#+begin_src clojure :exports code :results silent
+  (reduce #(map min %1 %2) [##Inf ##Inf] coords) ;;=> (1 1)
+  (reduce #(map max %1 %2) [0 0] coords)         ;;=> (8 9)
+#+end_src
+
+Then we'd use a ~list comprehension~ to create the grid:
+
+#+name: day06_make_grid
+#+begin_src clojure :noweb-ref code06 :exports code 
+(defn make-grid [[minx miny] [maxx maxy]]
+  (for [x (range minx (inc maxx)) y (range miny (inc maxy))] [x y]))
+
+#+end_src
+ 
+*** Addendum: the border
+This is what was missing in my first (not working) solution: to exclude areas considered infinite we have to find closest coordinates to the border of the grid. The border will consist only of points in range from minx to maxs and miny/maxy (upper and lower sides of the grid) or minx/max and range from miny to maxy (left and right) sides of the grid.
+
+#+name: day06_make_border_sketch
+#+begin_src clojure :exports code
+  (defn make-border [[minx miny] [maxx maxy]]
+    (concat (for [x (range minx (inc maxx))] [x miny])
+            (for [x (range minx (inc maxx))] [x maxy])
+            (for [y (range miny (inc maxy))] [minx y])
+            (for [y (range miny (inc maxy))] [maxx y])))
+#+end_src
+
+To make it more concise let's play with ~apply~ and ~list~:
+
+#+name: day06_make_border
+#+begin_src clojure :noweb-ref code06 :exports code
+(defn make-border [[minx miny] [maxx maxy]]
+  (apply concat (concat (for [x (range minx (inc maxx))] (list [x miny] [x maxy]))
+                        (for [y (range miny (inc maxy))] (list [minx y] [maxx y])))))
+
+#+end_src
+
+Let's test it agains example data:
+#+name: day06_make_border_test
+#+begin_src clojure :noweb-ref test06 :exports code
+  (deftest make-border-test
+    (testing "should match exemplary data"
+      (let [coords (input->xy "day06-ex")
+            mins (reduce #(map min %1 %2) [##Inf ##Inf] coords)
+            maxs (reduce #(map max %1 %2) [0 0] coords)
+            border '([1 1] [1 9] [2 1] [2 9] [3 1] [3 9] [4 1] [4 9] [5 1]
+                     [5 9] [6 1] [6 9] [7 1] [7 9] [8 1] [8 9] [1 1] [8 1]
+                     [1 2] [8 2] [1 3] [8 3] [1 4] [8 4] [1 5] [8 5] [1 6]
+                     [8 6] [1 7] [8 7] [1 8] [8 8] [1 9] [8 9])]
+        (is (= (sort border) (sort (make-border mins maxs)))))))
+
+#+end_src
+
+To get coordinates closest to the border, we may use ~keep~ iin the
+
+*** Encountering computational problems
+
+*** Putting things together
+#+name: day06_tangle_code
+#+begin_src clojure :noweb yes :tangle src/aoc18/puzzle06.clj :results silent :exports none
+  <<code06>>
+#+end_src
+
+#+name: day06_tangle_tests
+#+begin_src clojure :noweb yes :tangle test/aoc18/puzzle06_test.clj :exports results  :exports none
+  <<test06>>
+#+end_src
+
+#+name: day06_tests
+#+begin_src clojure :results output :exports results
+  (require '[clojure.test :refer [run-tests]] 'aoc18.puzzle06-test)
+  (run-tests 'aoc18.puzzle06-test)
+#+end_src
+
+#+RESULTS: day06_tests
+: 
+: Testing aoc18.puzzle06-test
+: 
+: Ran 1 tests containing 1 assertions.
+: 0 failures, 0 errors.
+
+#+RESULTS: day06_tangle_tests
+
+** COMMENT Notes
+For example, in the plane, the taxicab distance between {\displaystyle (p_{1},p_{2})}(p_{1},p_{2}) and {\displaystyle (q_{1},q_{2})}(q_{1},q_{2}) is {\displaystyle |p_{1}-q_{1}|+|p_{2}-q_{2}|.}|p_{1}-q_{1}|+|p_{2}-q_{2}|.
 
