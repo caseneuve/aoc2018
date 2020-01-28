@@ -21,15 +21,21 @@
   (testing "should raise FileNotFoundException"
     (is (thrown? java.lang.Exception (input->ints "nonexistent/file")))))
 
-(deftest read-input-lines-test
-  (testing "should return lazy seq of integers"
-    (with-redefs [slurp (constantly "1\n-2\n10\n-99 \n")]
-      (is (= (lazy-seq [1 -2 10 -99]) (input->ints "filename"))))))
-
 (deftest input->str-test
   (testing "should return lazy seq of strings"
     (with-redefs [slurp (constantly "first\n second\nthird \n")]
       (is (= ["first" "second" "third"] (input->str "filename"))))))
+
+(deftest input->ints-test
+  (testing "should convert lines as strings to integers"
+    (with-redefs [slurp (constantly "1\n2\n3\n4\n5\n")]
+      (is (= [1 2 3 4 5] (input->ints "filename"))))))
+
+(deftest input->xy-test
+  (testing "should convert lines with coordinates as strings to lists of x, y integers"
+    (with-redefs [slurp (constantly "1, 2\n2, 3\n3, 4\n4, 5\n")]
+      (is (= '((1 2) (2 3) (3 4) (4 5)) (input->xy "filename"))))))
+
 
 
 
