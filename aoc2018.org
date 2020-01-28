@@ -1638,7 +1638,7 @@ Get the answer:
 It takes about 10 sec to complete the second part (without using queue it was taking too long) -- I'm curious how could I optimize it to work faster?
 
 ** COMMENT Commentary
-* todo Day 06: Day 6: Chronal Coordinates
+* todo Day 06: Chronal Coordinates :pmap:min_key:dissoc:
 :PROPERTIES:
 :EXPORT_FILE_NAME: day06
 :EXPORT_HUGO_WEIGHT: 106
@@ -1990,6 +1990,11 @@ To get coordinates closest to the border, we may use ~keep~ iin the
 For example, in the plane, the taxicab distance between {\displaystyle (p_{1},p_{2})}(p_{1},p_{2}) and {\displaystyle (q_{1},q_{2})}(q_{1},q_{2}) is {\displaystyle |p_{1}-q_{1}|+|p_{2}-q_{2}|.}|p_{1}-q_{1}|+|p_{2}-q_{2}|.
 
 * todo Day 07: The Sum of Its Parts
+:PROPERTIES:
+:EXPORT_FILE_NAME: day07
+:EXPORT_HUGO_WEIGHT: 107
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :summary ""
+:END:
 ** Descriptions :noexport:
 *** Part 1
 You find yourself standing on a snow-covered coastline; apparently, you landed a little off course. The region is too hilly to see the North Pole from here, but you do spot some Elves that seem to be trying to unpack something that washed ashore. It's quite cold out, so you decide to risk creating a paradox by asking them for directions.
