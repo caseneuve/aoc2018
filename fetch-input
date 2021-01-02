@@ -1,0 +1,59 @@
+#!/bin/env bb
+;; vim: set filetype=clojure :
+
+(ns example
+  (:require [clojure.java.io :as io]
+            [clojure.tools.cli :refer [parse-opts]]
+            [babashka.curl :as curl]))
+
+(def TOKEN-FILE "aoc-token")
+(def YEAR "2018")
+(def DIR "inputs")
+(def cli-opts
+  [["-i" "--in NUM" "Day number"
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 26) "Day must be from 1 to 25"]]
+   ["-h" "--help"]])
+
+(defn get-token []
+  (try
+    ((load-file TOKEN-FILE) :token)
+    (catch Exception e
+      (println (str "Put your aoc token to " (.getMessage e)))
+      (System/exit 1))))
+
+(defn make-url [day]
+  (format "https://adventofcode.com/2018/day/%s/input" day))
+
+(defn make-file-name [day]
+  (when-not (.isDirectory (io/file DIR))
+    (println (format "There's no directory '%s'! Input was not saved." DIR))
+    (System/exit 1))
+  (format "%s/day%02d" DIR day))
+
+(defn fetch-input [day]
+  (println "Fetching input for day" day)
+  (let [url (make-url day)]
+    (try
+      (curl/get url {:headers {"cookie" (str "session=" (get-token))}})
+    (catch Exception e
+      (println "Could not fetch" url "got status:" ((.getData e) :status))
+      (System/exit 1)))))
+
+(defn write-input [file contents]
+  (println "Writing file:" file)
+  (spit file contents))
+
+(defn -main [{ opts :options help :summary err :errors}]
+  (when (not-empty err)
+    (doseq [l (conj err "Usage: <opt> <value>" help)] (println l))
+    (System/exit 1))
+  (let [day (opts :in) resp ((fetch-input day) :body)]
+    (when (empty? resp)
+      (println "Seems like input is empty?")
+      (System/exit 1))
+    (println)
+    (println resp)
+    (write-input (make-file-name day) resp)))
+
+(-main (parse-opts *command-line-args* cli-opts))
