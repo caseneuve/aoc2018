@@ -1,4 +1,4 @@
-target/
+.lein-*
 .nrepl-port
-.lein-failures
-aoc_token
+aoc?token
+target/
