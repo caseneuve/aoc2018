@@ -2,3 +2,6 @@
 .nrepl-port
 aoc?token
 target/
+.env
+.lsp/
+.clj-kondo/
