@@ -2,11 +2,11 @@
   (:require [input :refer [f->nums nums]]))
 
 (defn tree [[children meta & it]]
-  (loop [[c m & lst :as it] it,
-         [to-go & children] (list children),
-         [amount & next-meta :as meta] (list meta),
-         [parent & next-parents :as parents] (list 0),
-         node 1,
+  (loop [[c m & lst :as it] it
+         [to-go & children] (list children)
+         [amount & next-meta :as meta] (list meta)
+         [parent & next-parents :as parents] (list 0)
+         node 1
          Tree {}]
     (cond (nil? c) Tree
           (= to-go 0) (recur (drop amount it)
