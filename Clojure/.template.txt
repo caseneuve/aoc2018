@@ -1,0 +1,19 @@
+(ns %s
+  (:require [input :refer [f->str]]))
+
+(defn -main [day]
+  (let [input (->> day)]
+    {:part1 nil :part2 nil}))
+
+
+(comment
+  (let [test-input "
+
+"
+        input (->> test-input)
+        ]
+    (->> input
+
+         )
+    )
+  )
