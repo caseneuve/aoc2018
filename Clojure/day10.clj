@@ -2,25 +2,24 @@
   (:require [input :refer [f->str]]))
 
 (defn parse [it]
-  (->> it (re-seq #"-?\d+") (map parse-long) (partition 2) (partition 2)))
+  (->> it (re-seq #"-?\d+") (map parse-long) (partition 4)))
 
 (def minmax #(apply (juxt min max) %))
 
 (defn seconds [it]
-  (let [[mi ma] (minmax (map (comp second first) it))
-        step (->> it (keep (fn [[[_ y] [_ d]]] (when (= y mi) d))) first)]
-    (-> (- mi ma) (quot step) (quot 2) abs)))
+  (let [[mi ma] (minmax (map second it))
+        step (->> it (keep (fn [[_ y _ d]] (when (= y mi) d))) first)]
+    (-> (- mi ma) (quot (* 2 step)) abs)))
 
 (defn display [it]
   (let [[[x X] [y Y]] (map minmax (apply map vector it))]
     (doseq [y (range y (inc Y)), x (range x (inc X))]
       (print (if (some #{[x y]} it) "█" " ")) (when (= x X) (prn)))))
 
-(defn rewind [it s]
-  (reduce (fn [acc [[x y] [a b]]] (conj acc [(+ x (* s a)) (+ y (* s b))])) [] it))
+(defn fast-forward [it s] (keep (fn [[x y a b]] [(+ x (* s a)) (+ y (* s b))]) it))
 
 (defn -main [day]
-  (let [input (->> day f->str parse), s (seconds input), message (rewind input s)]
+  (let [input (->> day f->str parse), s (seconds input), message (fast-forward input s)]
     {:part1 (do (display message) "JJXZHKFP") :part2 s}))
 
 
@@ -57,6 +56,6 @@ position=< 5,  9> velocity=< 1, -2>
 position=<14,  7> velocity=<-2,  0>
 position=<-3,  6> velocity=< 2, -1>"
         input (->> test-input parse), s (seconds input)]
-    (display (rewind input s))
+    (display (fast-forward input s))
     (= 3 s))
   )

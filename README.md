@@ -17,4 +17,3 @@ As I revisited AoC 2018 few years later to finish what I've started, solutions f
 7b up, are organised differently.  They can be found in [Clojure](Clojure/)
 directory, and bootstrapping each day / solving the puzzle can be done using `bb`
 tasks (see: `bb tasks`).
-
