@@ -1,22 +1,20 @@
 (ns day10
   (:require [input :refer [f->str]]))
 
-(defn parse [it]
-  (->> it (re-seq #"-?\d+") (map parse-long) (partition 4)))
-
 (def minmax #(apply (juxt min max) %))
 
+(defn parse [it] (->> it (re-seq #"-?\d+") (map parse-long) (partition 4)))
+
 (defn seconds [it]
-  (let [[mi ma] (minmax (map second it))
-        step (->> it (keep (fn [[_ y _ d]] (when (= y mi) d))) first)]
+  (let [[mi ma] (minmax (map second it)), step (first (keep (fn [[_ y _ d]] (when (= y mi) d)) it))]
     (-> (- mi ma) (quot (* 2 step)) abs)))
+
+(defn fast-forward [it s] (keep (fn [[x y a b]] [(+ x (* s a)) (+ y (* s b))]) it))
 
 (defn display [it]
   (let [[[x X] [y Y]] (map minmax (apply map vector it))]
     (doseq [y (range y (inc Y)), x (range x (inc X))]
       (print (if (some #{[x y]} it) "█" " ")) (when (= x X) (prn)))))
-
-(defn fast-forward [it s] (keep (fn [[x y a b]] [(+ x (* s a)) (+ y (* s b))]) it))
 
 (defn -main [day]
   (let [input (->> day f->str parse), s (seconds input), message (fast-forward input s)]
