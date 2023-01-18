@@ -9,7 +9,8 @@
 
 (defn power-grid [it] (reduce #(assoc %1 %2 (power-lvl it %2)) {} grid))
 
-;; https://en.wikipedia.org/wiki/Summed-area_table
+;; The following algorithm is an implementation of Summed area table,
+;; see: https://en.wikipedia.org/wiki/Summed-area_table
 
 (defn points [g [x y]]
   (if (or (= 0 x) (= 0 y)) g
@@ -28,8 +29,9 @@
         [sc p] (last (sort-by first pts))]
     [sc (conj (mapv inc p) s)]))
 
-;; by examining results of `scores`, we see scores start to decline with squares bigger
+;; By examining results of `scores`, we see scores start to decline with squares bigger
 ;; than 11x11 -- using this heuristic we may assume 11 is the answer for part 2
+
 (defn scores [it beg end]
   (let [t (summed-table it)] (pmap (partial best-score t) (range beg (inc end)))))
 
