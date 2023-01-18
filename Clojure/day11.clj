@@ -22,8 +22,8 @@
   (- (+ (t [(dec (+ x r)) (dec (+ y r))] 0) (t [(dec x) (dec y)] 0))
      (t [(dec (+ x r)) (dec y)] 0) (t [(dec x) (dec (+ y r))] 0)))
 
-(defn best-score [tbl s]
-  (let [pts (for [y (range (- size s)) x (range (- size s))] [(summed-area tbl s [x y]) [x y]])
+(defn best-score [t s]
+  (let [pts (for [y (range (- size s)) x (range (- size s))] [(summed-area t s [x y]) [x y]])
         [sc p] (last (sort-by first pts))]
     [sc (conj (mapv inc p) s)]))
 
