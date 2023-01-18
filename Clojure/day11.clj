@@ -9,7 +9,7 @@
 
 (defn power-grid [it] (reduce #(assoc %1 %2 (power-lvl it %2)) {} grid))
 
-;; The following algorithm is an implementation of Summed area table,
+;; The following algorithm is an implementation of Summed-area table,
 ;; see: https://en.wikipedia.org/wiki/Summed-area_table
 
 (defn points [g [x y]]
