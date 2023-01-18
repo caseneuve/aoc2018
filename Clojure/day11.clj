@@ -5,10 +5,11 @@
 (def grid (for [y (range size) x (range size)] [x y]))
 
 (defn power-lvl [sn [x y]]
-  (let [id (+ (inc x) 10)]
-    (-> y inc (* id) (+ sn) (* id) (quot 100) (rem 10) (- 5))))
+  (let [id (+ (inc x) 10)] (-> y inc (* id) (+ sn) (* id) (quot 100) (rem 10) (- 5))))
 
 (defn power-grid [it] (reduce #(assoc %1 %2 (power-lvl it %2)) {} grid))
+
+;; https://en.wikipedia.org/wiki/Summed-area_table
 
 (defn points [g [x y]]
   (if (or (= 0 x) (= 0 y)) g
@@ -21,13 +22,14 @@
      (t [(dec y) (dec (+ x r))] 0) (t [(dec (+ y r)) (dec x)] 0)))
 
 (defn best-score [tbl s]
-  (let [pts (for [y (range (- size s)) x (range (- size s)) :when (and (>= y (dec s)) (>= x (dec s)))]
+  (let [pts (for [y (range (- size s)) x (range (- size s))
+                  :when (and (>= y (dec s)) (>= x (dec s)))]
               [(summed-area tbl s [x y]) [y x]])
         [sc p] (last (sort-by first pts))]
     [sc (conj (mapv inc p) s)]))
 
-;; by watching results of `scores`, we see scores start to decline with squares bigger than 11x11
-;; using this heuristic we may assume 11 is the answer for part 2
+;; by examining results of `scores`, we see scores start to decline with squares bigger
+;; than 11x11 -- using this heuristic we may assume 11 is the answer for part 2
 (defn scores [it beg end]
   (let [t (summed-table it)] (pmap (partial best-score t) (range beg (inc end)))))
 
