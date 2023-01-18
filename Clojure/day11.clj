@@ -19,13 +19,11 @@
 (defn summed-table [it] (reduce points (power-grid it) grid))
 
 (defn summed-area [t r [x y]]
-  (- (+ (t [(dec (+ y r)) (dec (+ x r))] 0) (t [(dec y) (dec x)] 0))
-     (t [(dec y) (dec (+ x r))] 0) (t [(dec (+ y r)) (dec x)] 0)))
+  (- (+ (t [(dec (+ x r)) (dec (+ y r))] 0) (t [(dec x) (dec y)] 0))
+     (t [(dec (+ x r)) (dec y)] 0) (t [(dec x) (dec (+ y r))] 0)))
 
 (defn best-score [tbl s]
-  (let [pts (for [y (range (- size s)) x (range (- size s))
-                  :when (and (>= y (dec s)) (>= x (dec s)))]
-              [(summed-area tbl s [x y]) [y x]])
+  (let [pts (for [y (range (- size s)) x (range (- size s))] [(summed-area tbl s [x y]) [x y]])
         [sc p] (last (sort-by first pts))]
     [sc (conj (mapv inc p) s)]))
 
