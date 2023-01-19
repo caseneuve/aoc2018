@@ -6,6 +6,11 @@
              [clojure.string :refer [join split-lines]])
   :init
   (do
+    (def input-dir "inputs")
+    (def solutions-dir "Clojure")
+    (def template-path (format "%s/.template.txt" solutions-dir))
+    (def day-path (partial format "%s/%s.clj" solutions-dir))
+
     (defn exit! [& msgs] (apply println msgs) (System/exit 1))
     (def config
       (try
@@ -15,13 +20,16 @@
     (def yd->url (partial format "https://adventofcode.com/%s/day/%s/input"))
     (def today (.format (java.text.SimpleDateFormat. "d") (new java.util.Date)))
     (def current-year (.format (java.text.SimpleDateFormat. "y") (new java.util.Date)))
-    (def day-path (partial format "Clojure/%s.clj"))
-    (def input-path (partial format "inputs/%s"))
-    (def template-path "Clojure/.template.txt")
+    (def input-path (partial format "%s/%s" input-dir))
     (defn day-fmt [d] (format "day%02d" (parse-long d)))
     (defn fetch-input [url token] (curl/get url {:raw-args ["--cookie" (format "session=%s" token)] :throw false}))
     (defn mkdir [d] (when-not (fs/exists? d) (println "Creating" d) (fs/create-dir d)))
-    (defn d-and-yr [d yr] [(or d today) (or yr (:year config) current-year)]))
+    (defn d-and-yr [d yr] [(or d today) (or yr (:year config) current-year)])
+
+    ;; sanity checks
+    (when-not (fs/exists? template-path) (exit! template-path "does not exist, please create it!"))
+    (doseq [d [input-dir solutions-dir]] (when-not (fs/exists? d) (fs/create-dir d)))
+    )
 
   template
   {:doc "  create template for solution [day and year default to current]"
