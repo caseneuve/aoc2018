@@ -13,7 +13,7 @@
 (defn generation [rules it]
   (let [[mi ma] (apply (juxt min max) it)]
     (loop [i (- mi 2), new #{}]
-      (if (= i (+ ma 3)) new
+      (if (= i (+ ma 2)) new
           (let [pat (for [x (range (- i 2) (+ i 3))] (if (contains? it x) \# \.))]
             (recur (inc i) (cond-> new (= (rules pat) \#) (conj i))))))))
 
