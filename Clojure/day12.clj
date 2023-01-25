@@ -18,7 +18,7 @@
             (recur (inc i) (cond-> new (= (rules pat) \#) (conj i))))))))
 
 ;; Heuristics for part 2:
-;; After 100 nth generation difference between sums is always 62 (at least in my input).
+;; After 100th generation difference between sums is always 62 (at least in my input).
 
 (defn -main [day]
   (let [[it rules] (parse (f->lines day)), genx (iterate (partial generation rules) it)]
