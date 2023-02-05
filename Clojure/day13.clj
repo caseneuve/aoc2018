@@ -4,12 +4,12 @@
 (defn parse [it]
   (rest
    (reduce
-    (fn [[[x y] tracks carts] c]
+    (fn [[[x y] tx cx] c]
       (cond
-        (= c \newline)             [[0 (inc y)] tracks carts]
-        (contains? (set "v^><") c) [[(inc x) y] tracks (conj carts [[x y] ({\v [0 1] \^ [0 -1] \< [-1 0] \> [1 0]} c) :l])]
-        (contains? (set "\\/+") c) [[(inc x) y] (assoc tracks [x y] c) carts]
-        :else                      [[(inc x) y] tracks carts]))
+        (= c \newline)             [[0 (inc y)] tx cx]
+        (contains? (set "v^<>") c) [[(inc x) y] tx (conj cx [[x y] ({\v [0 1] \^ [0 -1] \< [-1 0] \> [1 0]} c) :l])]
+        (contains? (set "\\/+") c) [[(inc x) y] (assoc tx [x y] c) cx]
+        :else                      [[(inc x) y] tx cx]))
     [[0 0] {} []] it)))
 
 (def b-slash #(vec (reverse %)))
