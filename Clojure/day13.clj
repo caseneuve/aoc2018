@@ -6,13 +6,10 @@
    (reduce
     (fn [[[x y] tracks carts] c]
       (cond
-        (= c \newline) [[0 (inc y)] tracks carts]
-        (= c \space)   [[(inc x) y] tracks carts]
-        (contains? (set "v^><") c)
-        [[(inc x) y] tracks
-         (conj carts [[x y] ({\v [0 1] \^ [0 -1] \< [-1 0] \> [1 0]} c) :l])]
+        (= c \newline)             [[0 (inc y)] tracks carts]
+        (contains? (set "v^><") c) [[(inc x) y] tracks (conj carts [[x y] ({\v [0 1] \^ [0 -1] \< [-1 0] \> [1 0]} c) :l])]
         (contains? (set "\\/+") c) [[(inc x) y] (assoc tracks [x y] c) carts]
-        :else [[(inc x) y] tracks carts]))
+        :else                      [[(inc x) y] tracks carts]))
     [[0 0] {} []] it)))
 
 (def b-slash #(vec (reverse %)))
