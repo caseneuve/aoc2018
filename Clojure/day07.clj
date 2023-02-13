@@ -15,14 +15,14 @@
 (defn solve [[need waiting] wait workers]
   (let [bu (partial busy-until wait), init (take workers (available waiting))]
     (loop [t 0
-           [[when done] & q] (sort (map #(bu 0 %) init))
+           [[sec done] & q] (sort (map #(bu 0 %) init))
            waiting (reduce #(dissoc %1 %2) waiting init)
            order []]
       (if (nil? done) [(apply str order) t]
           (let [waiting (reduce #(update %1 %2 dec) (dissoc waiting done) (need done))
                 steps (take (- workers (count q)) (sort (available waiting)))]
-            (recur when
-                   (sort (concat q (map #(bu when %) steps)))
+            (recur sec
+                   (sort (concat q (map #(bu sec %) steps)))
                    (reduce #(dissoc %1 %2) waiting steps)
                    (conj order done)))))))
 
