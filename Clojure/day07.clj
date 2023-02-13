@@ -8,7 +8,7 @@
           (fn [[need waiting] [a b]] [(update need a conj b) (update waiting b inc)])
           [{} (-> it set (zipmap (repeat 0)))]))))
 
-(defn available [R] (map first (filter #(= 0 (second %)) R)))
+(defn available [waiting] (map first (filter #(= 0 (second %)) waiting)))
 
 (defn busy-until [wait t step] [(- (+ (int step) wait t) (dec (int \A))) step])
 
