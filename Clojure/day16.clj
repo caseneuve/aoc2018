@@ -36,7 +36,7 @@
         (fn [idx]
           (reduce
            (fn [acc [br [o a b c] ar]]
-             (let [rs (for [i idx :when (= ((nth fns i) (vec br) a b c) (vec ar))] [o i])]
+             (let [rs (for [i idx :when (= ((fns i) (vec br) a b c) (vec ar))] [o i])]
                (if (= (count rs) 1) (into acc rs) acc))) #{} samples))]
     (loop [[idx ops :as it] [(set (range (count fns))) {}]]
       (if (empty? idx) ops
