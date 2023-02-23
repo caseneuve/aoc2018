@@ -38,11 +38,11 @@
            (fn [acc [br [o a b c] ar]]
              (let [rs (for [i idx :when (= ((nth fns i) (vec br) a b c) (vec ar))] [o i])]
                (if (= (count rs) 1) (into acc rs) acc))) #{} samples))]
-    (loop [[idx ops] [(set (range (count fns))) {}]]
+    (loop [[idx ops :as it] [(set (range (count fns))) {}]]
       (if (empty? idx) ops
-          (recur (reduce (fn [[idx ops] [i n]] [(disj idx n) (assoc ops i n)]) [idx ops] (uniqs idx)))))))
+          (recur (reduce (fn [[idx ops] [i n]] [(disj idx n) (assoc ops i n)]) it (uniqs idx)))))))
 
 (defn -main [day]
   (let [[samples test] (->> day f->str parse), ops (opcodes samples)]
     {:part1 (three-or-more samples)
-     :part2 (first (reduce (fn [r [o a b c]] ((nth fns (ops o)) r a b c)) [0 0 0 0] test))}))
+     :part2 (first (reduce (fn [r [o a b c]] ((fns (ops o)) r a b c)) [0 0 0 0] test))}))
