@@ -47,7 +47,7 @@
         (= "|" (G [x (inc y)]))                                 ; * reaching a surface of an already filled pond from a different fork:
         (if (empty? forks) (assoc G pos "|")                    ;   stop,
             (recur (peek forks) (pop forks) (assoc G pos "|"))) ;   or move to the next fork
-        (= (G pos) "~")                                         ; * already filled that pond (case: a fork within a pond),
+        (= "~" (G pos))                                         ; * already filled that pond (case: a fork within a pond),
         (recur (peek forks) (pop forks) G)                      ;   move to the next fork
         (some #{(G [x (inc y)])} ["#" "~"])                     ; * reaching either a 'bottom' of a pond or a partially filled one:
         (let [[[l? pos-l filled-l] [r? pos-r filled-r]] (fill pos G),
