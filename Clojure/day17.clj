@@ -2,6 +2,7 @@
   (:require [input :refer [f->str]]))
 
 ;; debugging fns
+
 (defn show [g]
   (let [[xmi xma] ((juxt #(apply min %) #(apply max %)) (map first  (keys g)))
         [_   yma] ((juxt #(apply min %) #(apply max %)) (map second (keys g)))]
@@ -14,6 +15,7 @@
       (print (g [x' y'] " ")) (when (= x' (+ (* n r) x)) (prn)))))
 
 ;; input
+
 (defn parse [it]
   (->> it (re-seq #"\w=[^,\n]+") (partition 2) (map sort)
        (map (fn [xy] (map #(re-seq #"\d+" %) xy)))
@@ -25,6 +27,7 @@
                      [[x y] "#"])))) {})))
 
 ;; solution
+
 (defn fill [[x y :as xy] ground]
   (for [f [dec inc]]
     (loop [x' (f x), filled [xy]]
@@ -50,14 +53,13 @@
         (let [[[l? pos-l filled-l] [r? pos-r filled-r]] (fill pos G),
               add #(add-layer G (concat filled-l filled-r) %)]
           (cond                                                 ;   fill it:
-            (and l? r?) (recur [x (dec y)] forks (add "~"))     ;     # both sides are clay #
-            l? (recur pos-r forks (add "|"))                    ;     one side stream <-
-            r? (recur pos-l forks (add "|"))                    ;     one side stream ->
+            (and l? r?) (recur [x (dec y)] forks  (add "~"))    ;     # both sides are clay #
+            l?          (recur pos-r       forks  (add "|"))    ;     one side stream <-
+            r?          (recur pos-l       forks  (add "|"))    ;     one side stream ->
             :else (recur pos-l (conj forks pos-r) (add "|"))    ;     stream both sides, move left, remember fork on the right
             ))
-
-        ;; stream down otherwise
-        :else (recur [x (inc y)], forks, (if (< y ymi) G (assoc G [x y] "|")))))))
+        :else                                                   ; * stream down otherwise
+        (recur [x (inc y)] forks (cond-> G (< ymi y) (assoc [x y] "|")))))))
 
 (defn -main [day]
   (let [water (->> day f->str parse flow-on vals frequencies)
