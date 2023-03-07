@@ -59,7 +59,7 @@
             :else (recur pos-l (conj forks pos-r) (add "|"))    ;     stream both sides, move left, remember fork on the right
             ))
         :else                                                   ; * stream down otherwise
-        (recur [x (inc y)] forks (cond-> G (< ymi y) (assoc [x y] "|")))))))
+        (recur [x (inc y)] forks (cond-> G (>= y ymi) (assoc [x y] "|")))))))
 
 (defn -main [day]
   (let [water (->> day f->str parse flow-on vals frequencies)
