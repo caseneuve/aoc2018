@@ -54,5 +54,5 @@
 ||...#|.#|
 |.||||..|.
 ...#.|..|."]
-    (= 1147 (->> test-input parse (lumber-collection 10))))
+    (= 1147 (-> test-input parse (lumber-collection 10))))
   )
