@@ -5,7 +5,7 @@
 
 (defn parse [it]
   (->> it
-       (reduce (fn [[[x y] g] c] (if (= c \newline) [[0 (inc y)] g] [[(inc x) y] (assoc g [x y] c)]))
+       (reduce (fn [[[x y] g] c] (case c \newline [[0 (inc y)] g] [[(inc x) y] (assoc g [x y] c)]))
         [[0 0] {}])
        second))
 
@@ -30,8 +30,8 @@
 ;; to find the reminder of (total-minutes - m2) divided by the cycle length (m1 - m2)
 ;; and update the grid for that reminder of time
 
-(defn lumber-collection [it minutes]
-  (loop [m 0, x minutes, grid it, seen {}]
+(defn lumber-collection [it total-minutes]
+  (loop [m 0, x total-minutes, grid it, seen {}]
     (if (= m x) (apply * (-> grid vals frequencies (dissoc \.) vals))
       (let [g (magic grid)]
         (if (contains? seen g)
